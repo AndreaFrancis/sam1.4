@@ -1,0 +1,76 @@
+<md-dialog aria-label="Nuevo Modulo" layout="column" class="md-thins-dialog">
+    <form name="newModuleForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Nuevo Modulo</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container" layout="column">
+            <div layout="row">
+              <md-input-container flex>
+                <label>Nombre</label>
+                <input ng-model="module.name" required name="name" module input-text>
+                <div ng-messages="newModuleForm.name.$error" ng-if="newModuleForm.name.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message='duplicated'>*El modulo ya existe</div>
+                    <div ng-message="inputText">*Ingrese solo letras</div>
+                </div>
+              </md-input-container>
+              <md-input-container flex>
+                <label>Estado</label>
+                <input ng-model="module.state" required name="state" input-text>
+                <div ng-messages="newModuleForm.state.$error" ng-if="newModuleForm.state.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo letras</div>
+                </div>
+              </md-input-container>
+            </div>
+            <div layout="row">
+              <md-input-container flex>
+                <label>Orden</label>
+                <input ng-model="module.order" required name="order" input-numeric>
+                <div ng-messages="newModuleForm.order.$error" ng-if="newModuleForm.order.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+                </div>
+              </md-input-container>
+              <md-input-container flex>
+                <label>Nombre del icono</label>
+                <input ng-model="module.icon" required name="icon">
+                <div ng-messages="newModuleForm.icon.$error" ng-if="newModuleForm.icon.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                </div>
+              </md-input-container>
+            </div>
+            <div layout="column">
+              <md-chips ng-model="selectedRoles" md-autocomplete-snap md-require-match="true">
+                <md-autocomplete
+                  md-selected-item="selectedItem"
+                  md-search-text-change="null"
+                  md-selected-item-change="itemChange(item)"
+                  md-search-text="searchText"
+                  md-items="item in querySearch(searchText)"
+                  md-item-text="item.name"
+                  placeholder="Elija los roles permitidos">
+                  <span md-highlight-text="searchText">{{item.name}}</span>
+                </md-autocomplete>
+              <md-chip-template>
+                <span>
+                  <strong>{{$chip.name}}</strong>
+                </span>
+              </md-chip-template>
+            </md-chips>
+          </div>
+        </md-dialog-content>
+        <div class="md-actions" layout="row">
+            <span flex></span>
+            <md-button class="md-primary" ng-click="save()" ng-disabled="newModuleForm.$invalid" type="submit">
+                Guardar
+            </md-button>
+            <md-button ng-click="cancel()">
+                Cancelar
+            </md-button>
+        </div>
+    </form>
+</md-dialog>

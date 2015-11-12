@@ -1,0 +1,56 @@
+<md-dialog aria-label="Nuevo laboratorio" layout="column">
+    <form name="newLabForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Nuevo  laboratorio</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container">
+          <div layout="column">
+            <md-input-container flex>
+                <label>Nombre</label>
+                <input ng-model="lab.name" required name="name" input-text lab>
+                <div ng-messages="newLabForm.name.$error" ng-if="newLabForm.name.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo texto</div>
+                </div>
+            </md-input-container>
+            <md-input-container flex>
+                <label>Descripcion</label>
+                <input ng-model="lab.description" required name="description" input-text>
+                <div ng-messages="newLabForm.description.$error" ng-if="newLabForm.description.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                </div>
+            </md-input-container>
+            <div layout="row">
+              <md-input-container flex>
+                <label>Ancho hojas (cm)</label>
+                <input ng-model="lab.width" required name="width" input-numeric>
+                <div ng-messages="newLabForm.width.$error" ng-if="newLabForm.width.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+                  </div>
+                </md-input-container>
+                <md-input-container flex>
+                  <label>Alto hojas (cm)</label>
+                  <input ng-model="lab.heigth" required name="heigth" input-numeric>
+                  <div ng-messages="newLabForm.heigth.$error" ng-if="newLabForm.heigth.$dirty">
+                      <div ng-message="required">*Campo obligatorio</div>
+                      <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+                    </div>
+                  </md-input-container>
+              </div>
+            </div>
+        </md-dialog-content>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="save()" ng-disabled="newLabForm.$invalid" type="submit">
+                    Guardar
+                </md-button>
+                <md-button ng-click="cancel()">
+                    Cancelar
+                </md-button>
+            </div>
+        </form>
+</md-dialog>

@@ -1,0 +1,40 @@
+<md-dialog aria-label="Personal" layout="column">
+    <form name="newPersonalForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Personal de laboratorio</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container">
+
+          <div layout="column">
+            <md-input-container flex>
+                <label>Cargo</label>
+                <input ng-model="pers.job" required name="job" input-text>
+                <div ng-messages="newPersonalForm.job.$error" ng-if="newPersonalForm.job.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo texto</div>
+                </div>
+            </md-input-container>
+          <div layout="row">
+            <md-select placeholder="Usuario" ng-model="selectedUser" flex required>
+                <md-option ng-repeat="us in users" ng-value="us">{{us.username}}</md-option>
+            </md-select>
+            <md-select placeholder="Laboratorio" ng-model="selectedLab" flex required>
+                <md-option ng-repeat="lab in labs" ng-value="lab">{{lab.name}}</md-option>
+            </md-select>
+          </div>
+          </div>
+        </md-dialog-content>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="save()" ng-disabled="newPersonalForm.$invalid" type="submit">
+                    Guardar
+                </md-button>
+                <md-button ng-click="cancel()">
+                    Cancelar
+                </md-button>
+            </div>
+        </form>
+</md-dialog>

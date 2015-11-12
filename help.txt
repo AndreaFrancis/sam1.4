@@ -1,0 +1,13 @@
+Pasos para exportar e importar la base de datos por defecto:
+ Exportar:
+ - Previamente el servidor debe estar siendo ejecutado, normalmente la base de datos en el puerto 3001
+ 1. Ejecutar el comando
+ mongodump -h localhost:3001 -d meteor -o dump
+
+Copie la carpeta en el directorio donde vaya a ejecutar el siguiente comando.
+
+ Importar:
+1. Ejecute el comando
+mongorestore -h localhost:3001 -d meteor
+
+Finalmente, se restauran los archivos de la carpeta dump

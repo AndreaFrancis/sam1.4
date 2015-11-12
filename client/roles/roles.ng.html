@@ -1,0 +1,54 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Roles</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<div>
+    <div class="main-fab">
+        <md-button class="md-fab md-accent" ng-click="showAddNew($event)" aria-label="Agregar">
+            <i class="fa fa-plus"></i>
+        </md-button>
+    </div>
+    <div class="sub-content">
+        <md-input-container>
+          <label>Buscar Rol </label>
+          <input ng-model="searchText" ng-change="search()">
+        </md-input-container>
+        <div class="table-responsive-vertical shadow-z-1 center-table">
+            <table id="table" class="table table-hover table-mc-light-blue">
+                <thead>
+                <tr>
+                    <th ng-repeat="h in headers" class="md-table-header">
+                        {{h}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr dir-paginate="rol in roles | itemsPerPage: perPage"  class="md-table-content-row" ng-click="show(rol, $event)" total-items="rolesCount.count">
+                    <td data-title="Nombre">{{ rol.name }}</td>
+
+                    <td data-title="">
+                        <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(rol,$event,roles)">
+                            <i class="fa fa-trash"></i>
+                        </md-button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div layout="row">
+            <md-input-container>
+                <label>Roles por pagina </label>
+                <input ng-model="perPage">
+            </md-input-container>
+            <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"></dir-pagination-controls>
+            <span></span>
+            <md-button class="md-icon" aria-label="Ver todo" ng-click="showAll()">
+                <i class="fa fa-eye"></i>
+            </md-button>
+            <md-button class="md-icon" ng-click="print()" aria-label="Imprimir">
+                      <i class="fa fa-print"></i>
+            </md-button>
+        </div>
+    </div>
+</div>

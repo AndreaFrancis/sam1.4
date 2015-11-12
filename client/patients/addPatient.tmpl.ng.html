@@ -1,0 +1,95 @@
+<md-dialog aria-label="Nuevo Paciente" layout="column">
+    <form name="newPatientForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Nuevo paciente</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container" layout="column">
+          <div layout="row">
+              <md-input-container flex>
+                  <label>Apellido Paterno</label>
+                  <input ng-model="patient.lastName" required name="lastName" input-text>
+                  <div ng-messages="newPatientForm.lastName.$error" ng-if="newPatientForm.lastName.$dirty">
+                      <div ng-message="required">*Campo obligatorio</div>
+                      <div ng-message="inputText">*Ingrese solo letras</div>
+                  </div>
+              </md-input-container>
+              <md-input-container flex>
+                  <label>Apellido Materno</label>
+                  <input ng-model="patient.lastNameMother" name="lastNameMother" input-text>
+                  <div ng-messages="newPatientForm.lastNameMother.$error" ng-if="newPatientForm.lastNameMother.$dirty">
+                      <div ng-message="required">*Campo obligatorio</div>
+                      <div ng-message="inputText">*Ingrese solo letras</div>
+                  </div>
+              </md-input-container>
+          </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label>Nombres</label>
+                    <input ng-model="patient.name" required name="name" input-text>
+                    <div ng-messages="newPatientForm.name.$error" ng-if="newPatientForm.name.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Edad</label>
+                    <input ng-model="patient.age.value" name="age" input-numeric required>
+                    <div ng-messages="newPatientForm.age.$error" ng-if="newPatientForm.age.$dirty">
+                        <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+                    </div>
+                </md-input-container>
+                <md-select placeholder="En" ng-model="patient.age.in" required>
+                    <md-option ng-repeat="i in inType" value="{{i}}">{{i}}</md-option>
+                </md-select>
+            </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label>Identidad</label>
+                    <input ng-model="patient.ci" required name="ci" patient-ci>
+                    <div ng-messages="newPatientForm.ci.$error" ng-if="newPatientForm.ci.$dirty">
+                        <div ng-message="duplicated">*Ya existe este documento</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>H.C</label>
+                    <input ng-model="patient.medHis" name="medhis" patient-hc>
+                    <div ng-messages="newPatientForm.medhis.$error" ng-if="newPatientForm.medhis.$dirty">
+                        <div ng-message="duplicated">*Ya existe este historial</div>
+                        <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+                    </div>
+                </md-input-container>
+            </div>
+            <div layout="row">
+                <md-radio-group ng-model="patient.gender" layout="row" required>
+                    <md-radio-button value="F" >Femenino</md-radio-button>
+                    <md-radio-button value="M" class="md-primary"> Masculino</md-radio-button>
+                </md-radio-group>
+            </div>
+            <div layout="row">
+                <md-input-container flex>
+                    <label>Telefono de referencia</label>
+                    <input ng-model="patient.phone"  name="phone">
+                    <div ng-messages="newPatientForm.phone.$error" ng-if="newPatientForm.phone.$dirty">
+                        <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+                    </div>
+                </md-input-container>
+                <md-input-container flex>
+                    <label>Direccion</label>
+                    <input ng-model="patient.address"  name="address">
+                </md-input-container>
+            </div>
+        </md-dialog-content>
+        <div class="md-actions" layout="row">
+            <span flex></span>
+            <md-button class="md-primary" ng-click="save()" ng-disabled="newPatientForm.$invalid" type="submit">
+                Guardar
+            </md-button>
+            <md-button ng-click="cancel()">
+                Cancelar
+            </md-button>
+        </div>
+    </form>
+</md-dialog>

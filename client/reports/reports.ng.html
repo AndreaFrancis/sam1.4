@@ -1,0 +1,344 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Reportes</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<div>
+  <md-content class="md-padding">
+    <md-tabs md-dynamic-height md-border-bottom>
+      <md-tab label="Fechas">
+        <md-content class="md-padding" id="reports">
+          <div layout="row">
+                  <md-input-container flex>
+                        <label>Desde</label>
+                      <input ng-model="pInitialDate"  type="date">
+                  </md-input-container>
+                  <md-input-container flex>
+                        <label>Hasta</label>
+                        <input ng-model="pEndDate"  type="date">
+                  </md-input-container>
+                  <md-button class="md-fab" aria-label="Generar" ng-click="createDateReport(pInitialDate,pEndDate)">
+                      <i class="fa fa-search"></i>
+                  </md-button>
+                  <md-button class="md-fab md-primary" ng-click="printDiv('reports')" aria-label="Print">
+                            <i class="fa fa-print"></i>
+                  </md-button>
+          </div>
+          <div class="sub-content">
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                  <th  class="md-table-header">
+                                    Cod.
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Fecha
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Paciente
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Edad
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Doctor
+                                  </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <tr ng-repeat="res in results" class="md-table-content-row">
+                                  <td data-title="Fecha">{{ res.dailyCode }}</td>
+                                  <td data-title="Fecha">{{ res.creationDate.toLocaleDateString() }}</td>
+                                  <td data-title="Paciente">{{ res.patientName }}</td>
+                                  <td data-title="Edad">{{ res.age.value }} {{ res.age.in }}</td>
+                                  <td data-title="Doctor">{{ res.doctorName }}</td>
+                              </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+          </md-content>
+      </md-tab>
+      <md-tab label="Procedencia">
+        <md-content class="md-padding" id="procedence">
+          <div layout="row">
+                    <md-input-container flex>
+                        <label>Desde</label>
+                        <input ng-model="pInitialDate"  type="date">
+                      </md-input-container>
+                      <md-input-container flex>
+                        <label>Hasta</label>
+                        <input ng-model="pEndDate"  type="date">
+                      </md-input-container>
+
+                      <md-select placeholder="Atencion" ng-model="selectedAttention">
+                          <md-option ng-repeat="attention in attentions" ng-value="attention._id">{{attention.name}}</md-option>
+                      </md-select>
+
+                      <md-select placeholder="Servicio" ng-model="selectedService">
+                          <md-option ng-repeat="service in services" ng-value="service._id">{{service.name}}</md-option>
+                      </md-select>
+                      <md-button class="md-fab" aria-label="Generar"  ng-click="createProcedenceReport(pInitialDate,pEndDate,selectedAttention,selectedService)">
+                          <i class="fa fa-search"></i>
+                      </md-button>
+                      <md-button class="md-fab md-primary" ng-click="printDiv('procedence')" aria-label="Print">
+                                <i class="fa fa-print"></i>
+                      </md-button>
+          </div>
+
+          <div class="sub-content">
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                  <th  class="md-table-header">
+                                    Cod.
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Fecha
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Paciente
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Edad
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Doctor
+                                  </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <tr ng-repeat="res in results" class="md-table-content-row">
+                                  <td data-title="Fecha">{{ res.dailyCode }}</td>
+                                  <td data-title="Fecha">{{ res.creationDate.toLocaleDateString() }}</td>
+                                  <td data-title="Paciente">{{ res.patientName }}</td>
+                                  <td data-title="Edad">{{ res.age.value }} {{ res.age.in }}</td>
+                                  <td data-title="Doctor">{{ res.doctorName }}</td>
+                              </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+        </md-content>
+      </md-tab>
+      <md-tab label="Paciente">
+        <md-content class="md-padding" id="gender">
+          <div layout="row">
+                  <md-input-container flex>
+                        <label>Desde</label>
+                      <input ng-model="pInitialDate"  type="date">
+                  </md-input-container>
+                  <md-input-container flex>
+                    <label>Hasta</label>
+                    <input ng-model="pEndDate"  type="date">
+                  </md-input-container>
+                  <md-button class="md-fab" aria-label="Generar" ng-click="createPatientReport(pInitialDate,pEndDate, gender,pInitialAge,pEndAge,selectedInType)">
+                      <i class="fa fa-search"></i>
+                  </md-button>
+                  <md-button class="md-fab md-primary" ng-click="printDiv('gender')" aria-label="Print">
+                            <i class="fa fa-print"></i>
+                  </md-button>
+          </div>
+          <div layout='row'>
+            <md-radio-group ng-model="gender" layout="column">
+                <md-radio-button value="F" >F</md-radio-button>
+                <md-radio-button value="M" class="md-primary">M</md-radio-button>
+            </md-radio-group>
+            <md-input-container flex>
+                  <label>Inicial</label>
+                  <input ng-model="pInitialAge"  type="text">
+                </md-input-container>
+                <md-input-container flex>
+                  <label>Final</label>
+                  <input ng-model="pEndAge"  type="text">
+                </md-input-container>
+                <md-select placeholder="En" ng-model="selectedInType">
+                    <md-option ng-repeat="i in inTypes" value="{{i}}">{{i}}</md-option>
+                </md-select>
+          </div>
+          <div class="sub-content">
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                  <th  class="md-table-header">
+                                    Cod.
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Fecha
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Paciente
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Edad
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Doctor
+                                  </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <tr ng-repeat="res in results" class="md-table-content-row">
+                                  <td data-title="Cod.">{{ res.dailyCode }}</td>
+                                  <td data-title="Fecha">{{ res.creationDate.toLocaleDateString() }}</td>
+                                  <td data-title="Paciente">{{ res.patientName }}</td>
+                                  <td data-title="Edad">{{ res.age.value }} {{ res.age.in }}</td>
+                                  <td data-title="Doctor">{{ res.doctorName }}</td>
+                              </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+          </md-content>
+      </md-tab>
+      <md-tab label="Analisis">
+        <md-content class="md-padding" id="analisys">
+          <div layout="row">
+                    <md-input-container flex>
+                        <label>Desde</label>
+                        <input ng-model="pInitialDate"  type="date">
+                      </md-input-container>
+                      <md-input-container flex>
+                        <label>Hasta</label>
+                        <input ng-model="pEndDate"  type="date">
+                      </md-input-container>
+
+                      <md-select placeholder="Analisis" ng-model="selectedAnalisys">
+                          <md-option ng-repeat="an in analisys" ng-value="an._id">{{an.name}}</md-option>
+                      </md-select>
+                      <md-button class="md-fab" aria-label="Generar"  ng-click="createAnalisysReport(pInitialDate,pEndDate,selectedAnalisys)">
+                          <i class="fa fa-search"></i>
+                      </md-button>
+                      <md-button class="md-fab md-primary"  ng-click="printDiv('analisys')" aria-label="Print">
+                                <i class="fa fa-print"></i>
+                      </md-button>
+          </div>
+
+          <div class="sub-content">
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                  <th  class="md-table-header">
+                                    Cod.
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Fecha
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Paciente
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Edad
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Doctor
+                                  </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <tr ng-repeat="res in results" class="md-table-content-row">
+                                  <td data-title="Fecha">{{ res.dailyCode }}</td>
+                                  <td data-title="Fecha">{{ res.creationDate.toLocaleDateString() }}</td>
+                                  <td data-title="Paciente">{{ res.patientName }}</td>
+                                  <td data-title="Edad">{{ res.age.value }} {{ res.age.in }}</td>
+                                  <td data-title="Doctor">{{ res.doctorName }}</td>
+                              </tr>
+                              </tbody>
+                          </table>
+                  </div>
+            </div>
+        </md-content>
+      </md-tab>
+      <md-tab label="Estadisticas">
+        <md-content class="md-padding" layout="column">
+          <div layout="row">
+            <md-input-container flex>
+                <label>Desde</label>
+              <input ng-model="pInitialDate"  type="date">
+            </md-input-container>
+            <md-input-container flex>
+                <label>Hasta</label>
+                <input ng-model="pEndDate"  type="date">
+              </md-input-container>
+              <md-button class="md-fab" aria-label="Generar" ng-click="createDiscriminated(pInitialDate,pEndDate)">
+                <i class="fa fa-search"></i>
+              </md-button>
+              <md-button class="md-fab md-primary" ng-click="exportExcel()" aria-label="Print">
+                        <i class="fa fa-print"></i>
+              </md-button>
+          </div>
+          <div class="sub-content">
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+                          <div id="exportable">
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                <th> Analisis</th>
+                                <th ng-repeat="at in attentions" align="center">
+
+                                  <table>
+                                    <tr>
+                                          <th ng-repeat="ser in services">
+                                            {{at.name}} - {{ser.name}}
+                                          </th>
+                                    </tr>
+                                  </table>
+                                </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                              <tr ng-repeat-start="(id,analisysId) in template" class="analisysHeader">
+                                <td>
+                                  <b><u>{{analisysId.name}}</u></b>
+                                </td>
+                                <td ng-repeat="at in attentions">
+                                  <table>
+                                    <tr>
+                                      <td ng-repeat="ser in services">
+                                        -{{template[id].result[at._id][ser._id]}}-
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                              <tr ng-repeat-end ng-repeat="(idTitle,title) in analisysId.titles">
+                                <td>
+                                  <b>{{title.name}}</b><br/>
+                                  <ul>
+                                    <li ng-repeat="(idExam, exam) in title.exams">
+                                       {{exam.name}}
+                                    </li>
+                                  </ul>
+                                </td>
+                                <td ng-repeat="at in attentions">
+                                  <table>
+                                    <tr>
+                                      <td ng-repeat="ser in services">
+                                        .......................<br>
+                                        <ul>
+                                          <li ng-repeat="(idExam, exam) in title.exams">
+                                          {{template[id].titles[idTitle].exams[idExam].result[at._id][ser._id]}}
+                                          </li>
+                                        </ul>
+
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                              </tbody>
+                          </table>
+                        </div>
+                  </div>
+            </div>
+        </md-content>
+      </md-tab>
+    </md-tabs>
+  </md-content>
+</div>

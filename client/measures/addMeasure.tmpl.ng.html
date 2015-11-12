@@ -1,0 +1,37 @@
+<md-dialog aria-label="Nueva unidad de medida" layout="column">
+    <form name="newMeasureForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Nueva unidad de medida</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container">
+          <md-input-container flex>
+              <label>Simbolo</label>
+              <input ng-model="measure.symbol" required  name="symbol" measure>
+              <div ng-messages="newMeasureForm.symbol.$error" ng-if="newMeasureForm.symbol.$dirty">
+                  <div ng-message="required">*Campo obligatorio</div>
+                  <div ng-message="duplicated">*El usuario ya existe</div>
+              </div>
+          </md-input-container>
+            <md-input-container flex>
+                <label>Nombre</label>
+                <input ng-model="measure.name" required name="name" input-text>
+                <div ng-messages="newMeasureForm.name.$error" ng-if="newMeasureForm.name.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo texto</div>
+                </div>
+            </md-input-container>
+        </md-dialog-content>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="save()" ng-disabled="newMeasureForm.$invalid" type="submit">
+                    Guardar
+                </md-button>
+                <md-button ng-click="cancel()">
+                    Cancelar
+                </md-button>
+            </div>
+        </form>
+</md-dialog>

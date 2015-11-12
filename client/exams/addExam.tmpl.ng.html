@@ -1,0 +1,86 @@
+<md-dialog aria-label="Nuevo examen" class="md-large-thin-dialog">
+    <form name="newExamForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Examen</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container">
+          <div layout="column">
+            <div layout="row">
+                <md-input-container flex>
+                    <label>Nombre</label>
+                    <input ng-model="exam.name" required name="name" input-text>
+                    <div ng-messages="newExamForm.name.$error" ng-if="newExamForm.name.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                    </div>
+                </md-input-container>
+                <md-select placeholder="Unidad de medida" ng-model="exam.measure" flex>
+                    <md-option ng-repeat="measure in measures" value="{{measure._id}}">{{measure.symbol}}</md-option>
+                </md-select>
+                <md-autocomplete flex required
+                md-selected-item-change="null"
+                  md-search-text-change="null"
+                name="autocompleteField"
+                md-no-cache="true"
+                md-selected-item="selectedTitle"
+                md-search-text="searchText"
+                md-items="item in querySearch(searchText)"
+                md-item-text="item.value"
+                md-floating-label="Titulo">
+                  <md-item-template>
+                    <span md-highlight-text="searchText">{{item.value}}</span>
+                  </md-item-template>
+                  <div ng-messages="newExamForm.autocompleteField.$error" ng-if="newExamForm.autocompleteField.$touched">
+                    <div ng-message="required"><b>Debe</b> escoger un titulo</div>
+                  </div>
+              </md-autocomplete>
+            </div>
+            <md-divider></md-divider>
+            <div layout="row">
+              <div layout="column" flex>
+                  <md-input-container>
+                    <label>Nombre del rango</label>
+                    <input ng-model="newRange.name" required name="newRangeName" input-text>
+                    <div ng-messages="newExamForm.newRangeName.$error" ng-if="newExamForm.newRangeName.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                    </div>
+                  </md-input-container>
+                  <md-select placeholder="Tipo de rango" ng-model="selectedType" ng-change="typeChange()">
+                      <md-option ng-repeat="tEva in typeEvaluations" ng-value="tEva">{{tEva.name}}</md-option>
+                  </md-select>
+                  <md-input-container ng-repeat="field in selectedType.fields">
+                      <label>{{field}}</label>
+                      <input ng-model="fields[$index]" required/>
+                  </md-input-container>
+                  <md-button class="md-primary" ng-click="saveRange()" ng-disabled="newExamForm.newRangeName.$invalid">
+                    &ensp;Agregar&ensp;&ensp;<span class="ion-chevron-right"></span>
+                  </md-button>
+              </div>
+              <md-list flex style="padding:20px;">
+                    <md-list-item ng-repeat="range in exam.ranges" class="md-3-line">
+                      <div class="md-list-item-text">
+                          <h3>{{range.name|truncate:15}}</h3>
+                          <h4>{{range.typeName}}</h4>
+                          <p><span ng-repeat="field in range.fields">{{field.name}}: {{field.value}}&ensp;</span></p>
+                      </div>
+                        <i class="md-secondary fa fa-trash" ng-click="deleteRange($index)" aria-label="Chat"></i>
+                    </md-list-item>
+              </md-list>
+            </div>
+          </div>
+        </md-dialog-content>
+        <div class="md-actions" layout="row">
+            <span flex></span>
+            <md-button class="md-primary" ng-click="save()" ng-disabled="newExamForm.name.$invalid" type="submit">
+                Guardar
+            </md-button>
+            <md-button ng-click="cancel()">
+                Cancelar
+            </md-button>
+        </div>
+    </form>
+</md-dialog>

@@ -1,0 +1,84 @@
+<div>
+    <div class="main-fab">
+        <md-button class="md-fab md-accent" ng-click="addStudy($event)" aria-label="Agregar">
+            <i class="fa fa-flask"></i>
+        </md-button>
+    </div>
+
+    <div class="sub-content" layout="column">
+          <md-button class="md-icon-button"  aria-label="Atras" ng-click="goPatients()">
+                                <i class="fa fa-arrow-left"></i>
+          </md-button>
+          <md-whiteframe class="md-whiteframe-z1">
+          <md-toolbar class="md-theme-light">
+            <h2 class="md-toolbar-tools">
+              <span>{{patient.lastName}} {{patient.lastNameMother}} {{patient.name}} </span>
+            </h2>
+          </md-toolbar>
+          <md-button aria-label="Imprimir" ng-click="print()">
+              Imprimir
+          </md-button>
+          <md-subheader class="md-no-sticky">Datos personales</md-subheader>
+          <div class="table-responsive-vertical shadow-z-1 center-table">
+              <!-- Table starts here -->
+              <table id="table" class="table table-hover table-mc-light-blue">
+                  <thead>
+                  <tr>
+                      <th>Direccion</th>
+                      <th>Telefono</th>
+                      <th>Edad</th>
+                      <th>Genero</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr class="md-table-content-row" ng-click="showPatient(patient, $event)">
+                      <td data-title="Direccion">{{ patient.adress }}</td>
+                      <td data-title="Telefono">{{patient.phone}}</td>
+                      <td data-title="Edad">{{patient.age.value}} {{patient.age.in}}</td>
+                      <td data-title="Genero">{{patient.gender}}</td>
+                  </tr>
+                  </tbody>
+              </table>
+          </div>
+            <md-subheader class="md-no-sticky">Estudios</md-subheader>
+            <div layout="row">
+              <md-input-container flex>
+                  <label>Desde</label>
+                <input ng-model="pInitialDate"  type="date">
+              </md-input-container>
+              <md-input-container flex>
+                  <label>Hasta</label>
+                  <input ng-model="pEndDate"  type="date">
+                </md-input-container>
+              <md-button class="md-fab" aria-label="Buscar" ng-click="showDate(pInitialDate,pEndDate)">
+                <i class="fa fa-search"></i>
+              </md-button>
+              <md-button class="md-fab md-primary" ng-click="showAll()" aria-label="Show all">
+                        <i class="fa fa-eye"></i>
+              </md-button>
+            </div>
+            <div class="table-responsive-vertical shadow-z-1 center-table">
+                <!-- Table starts here -->
+                <table id="table" class="table table-hover table-mc-light-blue">
+                    <thead>
+                    <tr>
+                        <th>Cod.</th>
+                        <th>Creador</th>
+                        <th>Fecha</th>
+                        <th>Diagnostico</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="md-table-content-row" ng-repeat="study in studies | orderBy: '-creationDate'" ng-click="show(study)">
+                        <td data-title="Cod.">{{ study.dailyCode }}</td>
+                        <td data-title="Creador">{{study.creatorName}}</td>
+                        <td data-title="Fecha">{{study.creationDate.toLocaleString()}}</td>
+                        <td data-title="Creador">{{study.diagnostic}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            </md-whiteframe>
+
+    </div>
+</div>

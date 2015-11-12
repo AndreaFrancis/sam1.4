@@ -1,0 +1,54 @@
+<md-dialog aria-label="Nuevo analisis" layout="column">
+    <md-dialog-content class="sticky-container">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Analisis</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <form name="newAnalisysForm" novalidate>
+          <div layout="column">
+            <md-input-container flex>
+                <label>Nombre</label>
+                <input ng-model="analisys.name" required name="name" analisys input-text>
+                <div ng-messages="newAnalisysForm.name.$error" ng-if="newAnalisysForm.name.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo texto</div>
+                    <div ng-message="duplicated">*El analisis ya fue registrada</div>
+                </div>
+            </md-input-container>
+            <md-input-container flex>
+                <label>Descripcion</label>
+                <textarea ng-model="analisys.description" name="description"></textarea>
+            </md-input-container>
+            <md-autocomplete flex required
+            md-selected-item-change="null"
+              md-search-text-change="null"
+            md-input-name="autocompleteField"
+            md-no-cache="true"
+            md-selected-item="selectedLab"
+            md-search-text="searchText"
+            md-items="item in querySearch(searchText)"
+            md-item-text="item.name"
+            md-floating-label="Laboratorio">
+              <md-item-template>
+                <span md-highlight-text="searchText">{{item.name}}</span>
+              </md-item-template>
+              <div ng-messages="newAnalisysForm.autocompleteField.$error" ng-if="newAnalisysForm.autocompleteField.$touched">
+                <div ng-message="required"><b>Debe</b> escoger un laboratorio</div>
+              </div>
+          </md-autocomplete>
+
+          </div>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="save()" ng-disabled="newAnalisysForm.$invalid" type="submit">
+                    Guardar
+                </md-button>
+                <md-button ng-click="cancel()">
+                    Cancelar
+                </md-button>
+            </div>
+        </form>
+    </md-dialog-content>
+</md-dialog>

@@ -1,0 +1,54 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="login-panel panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Laboratorio IGBJ</h3>
+                </div>
+                <div class="panel-body">
+                    <form role="form" name="loginForm" novalidate>
+                        <fieldset>
+                            <div class="form-group">
+                                <input class="form-control" placeholder="Nombre de usuario"  autofocus ng-model="username" required name="username">
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" placeholder="Clave" type="password" value="" ng-model="password" required name="password">
+                            </div>
+                            <label class="error">{{error}}</label>
+                            <a href="#" class="btn btn-lg btn-success btn-block" ng-click="login()" ng-disabled="loginForm.$invalid">Login</a>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--div layout="column" layout-align="center center">
+    <h1>Laboratorio Clinico</h1>
+    <h3>IGBJ</h3>
+  <md-whiteframe class="md-whiteframe-z1" layout layout-align="center center">
+    <form layout="column" name="loginForm" novalidate>
+      <div class="group">
+        <md-input-container>
+            <label>Nombre de usuario</label>
+            <input ng-model="username" required name="username">
+            <div ng-messages="loginForm.username.$error" ng-if="loginForm.username.$dirty">
+                <div ng-message="required">*Campo obligatorio</div>
+            </div>
+        </md-input-container>
+      </div>
+      <div class="group">
+        <md-input-container>
+            <label>Password</label>
+            <input ng-model="password" required name="password" type="password">
+            <div ng-messages="loginForm.password.$error" ng-if="loginForm.password.$dirty">
+                <div ng-message="required">*Campo obligatorio</div>
+            </div>
+        </md-input-container>
+      </div>
+      <label class="error">{{error}}</label>
+      <md-button class="md-raised md-primary" ng-click="login()" ng-disabled="loginForm.$invalid">Acceder</md-button>
+    </form>
+  </md-whiteframe>
+</div-->

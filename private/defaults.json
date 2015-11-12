@@ -1,0 +1,32 @@
+{
+  "admin":
+  { 
+  	"profile":
+  	{	
+  		"name":"admin"
+  	}, 
+  	"username": "admin",
+  	"password": "admin123"
+  },
+  "roles":["Admin","Bioquimico","Doctor"],
+  "mainrol":"Admin",
+  "modules":[
+  	{"name":"Inicio", "state":"start","order":1,"icon":"fa fa-user"},
+    {"name":"Roles", "state":"roles","order":2,"icon":"fa fa-user"},
+  	{"name":"Modulos", "state":"modules","order":3,"icon":"fa fa-user"},
+    {"name":"Usuarios", "state":"users","order":4,"icon":"fa fa-user"},
+    {"name":"Servicios", "state":"services","order":5,"icon":"fa fa-user"},
+    {"name":"Atencion", "state":"attentions","order":6,"icon":"fa fa-user"},
+    {"name":"Doctores", "state":"doctors","order":7,"icon":"fa fa-user"},
+    {"name":"Laboratorios", "state":"labs","order":8,"icon":"fa fa-user"},
+    {"name":"Personal de labo", "state":"labpersonal","order":9,"icon":"fa fa-user"},
+    {"name":"Unidades de medida", "state":"measures","order":10,"icon":"fa fa-user"},
+    {"name":"Analisis", "state":"analisys","order":11,"icon":"fa fa-user"},
+    {"name":"Titulos", "state":"titles","order":12,"icon":"fa fa-user"},
+    {"name":"Examenes", "state":"exams","order":13,"icon":"fa fa-user"},
+    {"name":"Pacientes", "state":"patients","order":14,"icon":"fa fa-user"},
+    {"name":"Estudios", "state":"studies","order":15,"icon":"fa fa-user"},
+    {"name":"Resultados", "state":"results","order":16,"icon":"fa fa-user"},
+    {"name":"Reportes", "state":"reports","order":17,"icon":"fa fa-user"}
+  ]
+}

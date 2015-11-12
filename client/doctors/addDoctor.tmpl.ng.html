@@ -1,0 +1,67 @@
+<md-dialog aria-label="Doctores" layout="column">
+    <form name="newDoctorForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Doctor</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container">
+
+          <div layout="column">
+            <div layout="row">
+            <md-input-container flex>
+                <label>Nombre</label>
+                <input ng-model="doctor.name" required name="name" input-text>
+                <div ng-messages="newDoctorForm.name.$error" ng-if="newDoctorForm.name.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo texto</div>
+                </div>
+            </md-input-container>
+            <md-input-container flex>
+            <label>Apellidos</label>
+            <input ng-model="doctor.lastName" required name="lastName" input-text>
+            <div ng-messages="newDoctorForm.lastName.$error" ng-if="newDoctorForm.lastName.$dirty">
+                <div ng-message="required">*Campo obligatorio</div>
+                <div ng-message="inputText">*Ingrese solo texto</div>
+            </div>
+            </md-input-container>
+          </div>
+            <div layout="row">
+              <md-input-container flex>
+              <label>Especialidad</label>
+              <input ng-model="doctor.especialism" name="especialism" input-text>
+              <div ng-messages="newDoctorForm.especialism.$error" ng-if="newDoctorForm.especialism.$dirty">
+                  <div ng-message="inputText">*Ingrese solo texto</div>
+              </div>
+              </md-input-container>
+
+              <md-input-container flex>
+                  <label>Matricula</label>
+                  <input ng-model="doctor.enrolment" name="enrolment" doctor>
+                  <div ng-messages="newDoctorForm.enrolment.$error" ng-if="newDoctorForm.enrolment.$dirty">
+                      <div ng-message="duplicated">*La matricula ya fue registrada</div>
+                  </div>
+              </md-input-container>
+            </div>
+          <div layout="row" ng-if="isAdmin">
+            <md-checkbox ng-model="isUser" aria-label="Id de usuario">
+              Es interno
+            </md-checkbox>
+            <md-select placeholder="Usuario" ng-model="selectedUser" flex required>
+                <md-option ng-repeat="us in users" ng-value="us">{{us.username}}</md-option>
+            </md-select>
+          </div>
+          </div>
+        </md-dialog-content>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="save()" ng-disabled="newDoctorForm.$invalid" type="submit">
+                    Guardar
+                </md-button>
+                <md-button ng-click="cancel()">
+                    Cancelar
+                </md-button>
+            </div>
+        </form>
+</md-dialog>

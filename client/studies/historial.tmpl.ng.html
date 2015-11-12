@@ -1,0 +1,25 @@
+<md-dialog aria-label="Historial de examen" layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Historial de examen</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container">
+          <md-list>
+                <md-list-item class="md-3-line" ng-repeat="modification in exam.historial | orderBy: '-date'">
+                  <div class="md-list-item-text" layout="column">
+                    <h3>{{dateService.dateAsLiteral(modification.date)}}</h3>
+                    <p>{{ modification.userName }} cambio el valor a {{modification.value}}</p>
+                  </div>
+                </md-list-item>
+                <md-divider ></md-divider>
+          </md-list>
+        </md-dialog-content>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="cancel()">
+                    Ok
+                </md-button>
+            </div>
+</md-dialog>

@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Usuarios</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!--Ver en : http://codepen.io/jbltx/pen/WbdRRb-->
+<div ng-controller="UsersListCtrl">
+    <div class="main-fab">
+        <md-button class="md-fab md-accent" ng-click="showAddNew($event)" aria-label="Agregar">
+            <i class="fa fa-plus"></i>
+        </md-button>
+    </div>
+    <div class="sub-content">
+        <md-input-container>
+          <label>Buscar Usuario </label>
+          <input ng-model="searchText" ng-change="search()">
+        </md-input-container>
+        <md-button aria-label="Imprimir" ng-click="print()">
+            Imprimir
+        </md-button>
+        <div class="table-responsive-vertical shadow-z-1 center-table">
+            <!-- Table starts here -->
+            <table id="table" class="table table-hover table-mc-light-blue">
+                <thead>
+                <tr>
+                    <th ng-repeat="h in headers" class="md-table-header">
+                        {{h}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="user in users| orderBy: 'rol'" class="md-table-content-row" ng-click="show(user, $event)">
+                    <td data-title="">
+                        <img ng-src="{{user.profile.image}}" class="md-avatar" alt="{{user.username}}" />
+
+                    </td>
+                    <td data-title="Nick">{{ user.username}}</td>
+                    <td data-title="Nombre">{{ user.profile.name}}</td>
+                    <td data-title="Apellido">{{ user.profile.lastName}}</td>
+                    <td data-title="Rol">{{user.rol}}</td>
+                    <td data-title="Acciones">
+                        <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(user)">
+                            <i class="fa fa-trash"></i>
+                        </md-button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

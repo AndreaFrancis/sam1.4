@@ -1,0 +1,41 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Resultados</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<div>
+    <div class="sub-content">
+      <md-input-container>
+        <label>Buscar estudio </label>
+        <input ng-model="searchText" ng-change="search()">
+      </md-input-container>
+        <div class="table-responsive-vertical shadow-z-1 center-table">
+            <!-- Table starts here -->
+            <table id="table" class="table table-hover table-mc-light-blue">
+                <thead>
+                <tr>
+                    <th ng-repeat="h in headers" class="md-table-header">
+                        {{h}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="md-table-content-row" ng-repeat="study in studies | orderBy: '-creationDate'" ng-click="show(study, $event)">
+
+                    <td data-title="Labs">
+                        <span  ng-repeat="c in study.labsObj">{{c.name}} - {{c.counter}} </span>
+                    </td>
+                    <td data-title="Codigo">{{ study.dailyCode }}</td>
+                    <td data-title="Paciente">{{study.patientObj.name}} {{study.patientObj.lastName}} {{study.patientObj.lastNameMother}}</td>
+                    <td data-title="Fecha">{{study.creationDate.toLocaleString()}}</td>
+                    <td data-title="Acciones">
+                        <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(study, $event)">
+                            <i class="fa fa-trash"></i>
+                        </md-button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">{{username}}</h1>
+    </div>
+
+    <img src="{{user.profile.image}}">
+    <br>
+    <div>
+    <b>Nombre:</b> {{user.profile.name}}<br>
+    <b>Apellido:</b> {{user.profile.lastName}} {{user.profile.lastNameMother}}<br>
+    <b>Rol:</b> {{userRol}}<br>
+    <div ng-if="isBioquimic">
+      <b>Laboratorio:</b> {{lab.name}}<br>
+      <b>Cargo:</b> {{personal.job}}<br>
+    </div>
+    <div ng-if="isDoctor">
+      <b>Matricula:</b> {{doctor.enrolment}}<br>
+      <b>Especialidad:</b> {{doctor.especialism}}<br>
+    </div>
+  </div>
+</div>

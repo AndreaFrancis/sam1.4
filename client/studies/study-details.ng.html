@@ -1,0 +1,240 @@
+<div class="row">
+      <div class="col-lg-12">
+          <h1 class="page-header">
+            <md-button class="md-fab" aria-label="Estudio" ng-click="printStudy()" ng-if="isBioquimic">
+                <i class="fa fa-print"></i>
+            </md-button>
+            <md-button class="md-fab md-primary" ng-click="printContainer()" aria-label="Sobre" ng-if="isBioquimic">
+                      <i class="fa fa-envelope-o"></i>
+            </md-button>
+            <md-button class="md-fab md-primary" ng-click="printOrder()" aria-label="Print order" ng-if="isDoctor">
+                      <i class="fa fa-print"></i>
+            </md-button>
+            Estudio
+          </h1>
+      </div>
+  </div>
+  <!--end rol-->
+  <!--Start eow-->
+  <div layout="column">
+    <div  ng-if="isBioquimic" layout="row">
+      <md-input-container flex >
+        <label>Codigo</label>
+        <input ng-model="study.dailyCode"  name="dailyCode" daily-study date="{{study.creationDate}}"  code={{study.dailyCode}}>
+        <div ng-messages="newStudyForm.dailyCode.$error" ng-if="newStudyForm.dailyCode.$dirty">
+            <div ng-message="duplicated">*El estudio ya fue programado</div>
+          </div>
+      </md-input-container>
+      <md-input-container flex>
+        <label>Nro. Factura</label>
+        <input ng-model="study.bill"  name="bill">
+      </md-input-container>
+    </div>
+    <div layout="row">
+      <div flex>
+        <b> Servicio:</b> {{study.serviceName}}
+      </div>
+      <div flex>
+        <b> Atencion:</b> {{study.attentionName}}
+      </div>
+    </div>
+  </div>
+  <!--End eow-->
+  <!--Start row-->
+  <div flex layout="row">
+      <div flex>
+          <div ng-show="existingPatient || isExistingStudy">
+              <b> Paciente:</b> {{study.patientObj.lastName}} {{study.patientObj.lastNameMother}} {{study.patientObj.name}}
+          </div>
+          <!--Start autocomplete-->
+          <div layout="row" ng-hide="existingPatient || isExistingStudy ">
+              <md-autocomplete
+                      md-search-text-change="null"
+                      md-no-cache="noCache"
+                      md-selected-item="selectedItem"
+                      md-sea rch-text="searchText"
+                      md-selected-item-change="selectedItemChange(item)"
+                      md-items="item in querySearch(searchText)"
+                      md-item-text="item.value"
+                      md-min-length="0"
+                      placeholder="Paciente"
+                      md-menu-class="autocomplete-custom-template">
+                  <md-item-template>
+                  <span class="item-title">
+                      <span> {{item.value}}</span>
+                  </span>
+                  <span class="item-metadata">
+                      <span class="item-metastat">
+                          <strong>{{item.ci}}</strong>
+                      </span>
+                  </span>
+                  </md-item-template>
+              </md-autocomplete>
+              <md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewPatient($event)">
+                  <i class="fa fa-plus"></i>
+              </md-button>
+          </div>
+        </div>
+        <div flex>
+          <!--End autocomplete-->
+          <div ng-show="existingDoctor || isExistingStudy || isDoctor ">
+              <b>Doctor:</b> {{study.doctorObj.lastName}}  {{study.doctorObj.name}}
+          </div>
+          <!--Start Autocompletet-->
+          <div layout="row" ng-hide="existingDoctor || isExistingStudy ">
+              <md-autocomplete
+                    md-selected-item-change="null"
+                      md-search-text-change="null"
+                      md-selected-item="selectedDoctor"
+                      md-search-text="searchDoctorText"
+                      md-items="item in queryDoctors(searchDoctorText)"
+                      md-item-text="item.value"
+                      md-min-length="0"
+                      placeholder="Doctor"
+                      md-menu-class="autocomplete-custom-template">
+                  <md-item-template>
+                  <span class="item-title">
+                      <span> {{item.value}}</span>
+                  </span>
+                  <span class="item-metadata">
+                      <span class="item-metastat">
+                          <strong>{{item.enrolment}}</strong>
+                      </span>
+                  </span>
+                  </md-item-template>
+              </md-autocomplete>
+              <md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewDoctor($event)">
+                  <i class="fa fa-plus"></i>
+              </md-button>
+          </div>
+        </div>
+          <!--End Autocompletet-->
+  </div>
+  <!--End row-->
+
+  <!--Start eow-->
+  <div layout="row">
+    <md-input-container flex>
+      <label>Diagnostico</label>
+      <input ng-model="study.diagnostic"  name="diagnostic">
+    </md-input-container>
+    <!--Startintern-->
+    <div ng-show="internData" layout="row">
+        <md-input-container flex>
+          <label>Cama</label>
+          <input ng-model="study.internData.bed"  name="bed">
+        </md-input-container>
+        <md-input-container flex>
+          <label>Sala</label>
+          <input ng-model="study.internData.room"  name="room">
+        </md-input-container>
+    </div>
+    <!--End intern-->
+  </div>
+  <!--End eow-->
+  <!--Start row-->
+  <div layout="row" ng-if="isBioquimic">
+    <md-input-container flex>
+      <label>Muestras</label>
+      <input ng-model="study.shows"  name="shows">
+    </md-input-container>
+    <md-input-container flex>
+      <label>Fecha</label>
+      <input ng-model="study.creationDate"  name="creationDate" type="date">
+    </md-input-container>
+  </div>
+  <md-button class="md-icon-button" flex  aria-label="Guardar" ng-click="saveStudy($event)" ng-if="isBioquimic">
+      <i class="fa fa-save"></i>
+  </md-button>
+  <!--end row-->
+  <!--Start row-->
+  <div flex layout="row">
+          <!--Start row-->
+          <div class="row">
+            <!--Start col-->
+            <div class="col-lg-12">
+              <!--Start panel-->
+              <div class="panel panel-default">
+                <!--Start table-->
+                <div ng-repeat="analisys in study.analisys">
+                  <div ng-show="analisys.lab() == myLab || isDoctor">
+                  <md-toolbar md-scroll-shrink>
+                    <div class="md-toolbar-tools">
+                      <h3><span>{{analisys.name()}}</span></h3>
+                    </div>
+                  </md-toolbar>
+                  <div ng-repeat="title in analisys.titles">
+                      <md-subheader class="md-primary">{{title.name()}}</md-subheader>
+                           <div class="dataTable_wrapper">
+                               <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                 <thead>
+                                   <tr>
+                                     <th class="md-table-header" ng-if="isBioquimic">Responsable</th>
+                                     <th class="md-table-header" ng-if="isBioquimic">Historial</th>
+                                     <th class="md-table-header">Examen</th>
+                                     <th class="md-table-header">Resultado</th>
+                                     <th class="md-table-header">U. Med</th>
+                                     <th class="md-table-header">Referencia</th>
+                                     <th class="md-table-header">Detalle</th></tr>
+                                 </thead>
+                                 <tbody>
+                                  <tr class="md-table-content-row" ng-repeat="exam in title.exams" ng-init="edit=false">
+                                      <td data-title="Responsable" ng-if="isBioquimic">{{exam.responsible}} </td>
+                                      <td data-title="Historial" ng-if="isBioquimic">
+                                        <div layout="row">
+                                          <md-button class="md-icon-button" flex  aria-label="Historial" ng-click="showHistorial(exam,$event)">
+                                            <i class="fa fa-file-text-o"></i>
+                                          </md-button>
+                                          <!--md-button class="md-icon-button" flex  aria-label="Editar" ng-click="edit=true" ng-hide="edit">
+                                            <i class="fa fa-pencil-square-o"></i>
+                                          </md-button>
+                                          <md-button class="md-icon-button" flex  aria-label="Cancelar" ng-click="edit=false" ng-show="edit">
+                                            <i class="fa fa-minus"></i>
+                                          </md-button>
+                                          <md-button class="md-icon-button" flex  aria-label="Guardar" ng-click="edit=false;save(exam)" ng-show="edit">
+                                            <i class="fa fa-floppy-o"></i>
+                                          </md-button-->
+                                        </div>
+                                      </td>
+                                      <td data-title="Examen">{{exam.name()}}</td>
+                                      <td data-title="Resultado">
+                                        <md-input-container>
+                                          <label></label>
+                                          <input ng-model="exam.result"  name="result" ng-keyup="$event.keyCode == 13 && save(exam)">
+                                        </md-input-container>
+                                      </td>
+                                      <td data-title="U. Med">
+                                        {{exam.symbol()}}
+                                      </td>
+                                      <td data-title="Examen">
+                                        <ul>
+                                          <li ng-repeat="range in exam.ranges()">
+                                            <p>{{range.name}} - {{range.typeName()}}
+                                              <span ng-repeat="field in range.fields">{{field.name}}: {{field.value}}&ensp;</span>
+                                                {{exam.symbol()}}
+                                            </p>
+                                          </li>
+                                        </ul>
+                                      </td>
+                                      <td data-title="Detalle" ng-style="exam.state === true && {'background-color': '#66CC99'} ||
+                                                                         exam.state === false && {'background-color': 'red'} ||
+                                                                         exam.state === undefined && {'background-color': 'white'}"
+                                      >{{exam.detail}}</td>
+                                  </tr>
+                                </tbody>
+                                </table>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                <!--end table-->
+
+              </div>
+              <!--End panel-->
+            </div>
+            <!--End col-->
+            <div>
+            </div>
+</div>
+<!--End page wrapper-->
+</div>

@@ -1,0 +1,29 @@
+<md-dialog aria-label="Nuevo Examen" layout="column">
+    <md-dialog-content class="sticky-container" layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Eliminar estudio</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <form name="reasonForm" novalidate layout="column">
+            <md-input-container flex>
+                <label>Ingrese el motivo por el cual desea eliminar este estudio</label>
+                <input ng-model="reason" required name="reason" input-text>
+                <div ng-messages="reasonForm.reason.$error" ng-if="reasonForm.reason.$dirty">
+                    <div ng-message="required">*Campo obligatorio</div>
+                    <div ng-message="inputText">*Ingrese solo texto</div>
+                </div>
+            </md-input-container>
+            <div class="md-actions" layout="row">
+                <span flex></span>
+                <md-button class="md-primary" ng-click="delete()" ng-disabled="reasonForm.$invalid" type="submit">
+                    Eliminar
+                </md-button>
+                <md-button ng-click="cancel()">
+                    Cancelar
+                </md-button>
+            </div>
+        </form>
+    </md-dialog-content>
+</md-dialog>

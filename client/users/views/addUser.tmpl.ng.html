@@ -1,0 +1,85 @@
+<md-dialog aria-label="Nuevo Usuario" layout="column">
+    <form name="newUserForm" novalidate layout="column">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Nuevo Usuario</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="sticky-container" layout="column">
+            <div layout="row">
+                  <md-input-container flex>
+                    <label>Nombre</label>
+                    <input name="name" ng-model="user.profile.name" required input-text>
+                    <div ng-messages="newUserForm.name.$error" ng-if="newUserForm.name.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                    </div>
+                  </md-input-container>
+            </div>
+            <div layout="row">
+                  <md-input-container flex>
+                    <label>Apellido paterno</label>
+                    <input ng-model="user.profile.lastName" required name="lastName" input-text>
+                    <div ng-messages="newUserForm.lastName.$error" ng-if="newUserForm.lastName.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                    </div>
+                  </md-input-container>
+                  <md-input-container flex>
+                    <label>Apellido paterno</label>
+                    <input ng-model="user.profile.lastNameMother" required name="lastNameMother" input-text>
+                    <div ng-messages="newUserForm.lastNameMother.$error" ng-if="newUserForm.lastNameMother.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                    </div>
+                  </md-input-container>
+              </div>
+              <div layout="row">
+                <md-input-container flex>
+                  <label>Correo</label>
+                  <input ng-model="user.profile.email" required type="email" name="email">
+                  <div ng-messages="newUserForm.email.$error" ng-if="newUserForm.email.$dirty">
+                    <div ng-message="inputText">*Campo obligatorio</div>
+                  </div>
+                </md-input-container>
+              </div>
+              <div layout="row">
+                <div layout="column">
+                  <md-input-container flex>
+                    <label>Nombre de usuario</label>
+                    <input ng-model="user.username" required  name="username" input-text user>
+                    <div ng-messages="newUserForm.username.$error" ng-if="newUserForm.username.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="inputText">*Ingrese solo letras</div>
+                        <div ng-message="duplicated">*El usuario ya existe</div>
+                    </div>
+                  </md-input-container>
+                  <md-input-container flex>
+                    <label>Password</label>
+                    <input ng-model="user.password" required type="password" name="password" password>
+                    <div ng-messages="newUserForm.password.$error" ng-if="newUserForm.password.$dirty">
+                        <div ng-message="required">*Campo obligatorio</div>
+                        <div ng-message="password">*Debe contener al menos 1 letra 1 numero , 1 caracter especial y ser mayor a 6</div>
+                    </div>
+                  </md-input-container>
+                  <md-select placeholder="Rol" ng-model="selectedRol" flex required>
+                      <md-option ng-repeat="rol in roles" ng-value="{{rol}}">{{rol.name}}</md-option>
+                  </md-select>
+                </div>
+                <div flex ng-style="imageStyle" layout="row" layout-align="center center">
+                  <input type="file" custom-on-change="uploadFile" required name="image" class="input-image-src" accept="image/*"/>
+                </div>
+              </div>
+        </md-dialog-content>
+        <div class="md-actions" layout="row">
+            <span flex></span>
+            <md-button class="md-primary" ng-click="save(user)" ng-disabled="newUserForm.$invalid" type="submit">
+                Guardar
+            </md-button>
+            <md-button ng-click="cancel()">
+                Cancelar
+            </md-button>
+        </div>
+    </form>
+</md-dialog>

@@ -1,0 +1,155 @@
+<div class="row">
+
+    <div class="col-lg-12">
+        <h1 class="page-header">Bienvenido</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+<div class="column">
+  <div layout="row">
+    <div class="col-lg-3 col-md-6" ng-if="isAdmin">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-bookmark fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{roles}}</div>
+                        <div>Roles</div>
+                    </div>
+                </div>
+            </div>
+            <a href="roles">
+                <div class="panel-footer">
+                    <span class="pull-left">View Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6" ng-if="isAdmin">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-users fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{users}}</div>
+                        <div>Usuarios</div>
+                    </div>
+                </div>
+            </div>
+            <a href="users">
+                <div class="panel-footer">
+                    <span class="pull-left">Ver detalles</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6" ng-if="isAdmin">
+        <div class="panel panel-yellow">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-user-md fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{doctors}}</div>
+                        <div>Doctores</div>
+                    </div>
+                </div>
+            </div>
+            <a href="doctors">
+                <div class="panel-footer">
+                    <span class="pull-left">Ver detalles</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6" ng-if="isAdmin">
+        <div class="panel panel-red">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-stethoscope fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{analisys}}</div>
+                        <div>Analisis</div>
+                    </div>
+                </div>
+            </div>
+            <a href="analisys">
+                <div class="panel-footer">
+                    <span class="pull-left">Ver detalles</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6" ng-if="isBioquimic">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-bookmark fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{results}}</div>
+                        <div>Estudios pendientes</div>
+                    </div>
+                </div>
+            </div>
+            <a href="results">
+                <div class="panel-footer">
+                    <span class="pull-left">Ver detalles</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6" ng-if="isDoctor">
+        <div class="panel panel-green">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <i class="fa fa-stethoscope fa-5x"></i>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{studies}}</div>
+                        <div>Estudios creados</div>
+                    </div>
+                </div>
+            </div>
+            <a href="studies">
+                <div class="panel-footer">
+                    <span class="pull-left">Ver detalles</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+  </div>
+    <hr>
+    <p>
+      El Instituto de Gastroenterología Boliviano Japonés (IGBJ), se fundó el 24 de abril de 1981, siendo el último de tres Institutos similares, donados por el Pueblo y el Gobierno del Japón, dentro del marco de cooperación de la Agencia Internacional del Japón (JICA).
+IGBJ es un hospital público, de III nivel, especializado en la atención de enfermedades digestivas complejas, tanto médicas como quirúrgicas la cual  depende del Servicio Departamental de Salud, Gobierno Autónomo Departamental del Cochabamba y del Ministerio de Salud.
+La institución cuenta con tecnología de punta en el campo de la Endoscopía Digestiva, tanto diagnóstica como terapéutica, donde se realizan procedimientos de alta complejidad, cirugía laparoscópica y procedimientos de diagnóstico en motilidad digestiva.
+Dentro de los departamentos que conforman la institución se encuentra la dirección de Laboratorios encargada de realizar los respectivos procedimientos de análisis, evaluación y detección epidemiológica para el apoyo del diagnóstico médico.
+
+    </p>
+</div>
+<!-- /.row -->
