@@ -15,9 +15,6 @@
           <label>Buscar laboratorio </label>
           <input ng-model="searchText" ng-change="search()">
         </md-input-container>
-        <md-button aria-label="Imprimir" ng-click="print()">
-              Imprimir
-        </md-button>
         <div class="table-responsive-vertical shadow-z-1 center-table">
             <!-- Table starts here -->
             <table id="table" class="table table-hover table-mc-light-blue">
@@ -28,7 +25,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="lab in labs" class="md-table-content-row" ng-click="show(lab, $event)">
+                <tr dir-paginate="lab in labs| itemsPerPage: perPage" class="md-table-content-row" ng-click="show(lab, $event)" total-items="labsCount.count">
+
                     <td data-title="Nombre">{{ lab.name }}</td>
                     <td data-title="Descripcion">{{ lab.description }}</td>
                     <td data-title="">
@@ -39,6 +37,20 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div layout="row">
+            <md-input-container>
+                <label>Items</label>
+                <input ng-model="perPage">
+            </md-input-container>
+            <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"></dir-pagination-controls>
+            <span></span>
+            <md-button class="md-icon" aria-label="Ver todo" ng-click="showAll()">
+                <i class="fa fa-eye"></i>
+            </md-button>
+            <md-button class="md-icon" ng-click="print()" aria-label="Imprimir">
+                      <i class="fa fa-print"></i>
+            </md-button>
         </div>
     </div>
 </div>

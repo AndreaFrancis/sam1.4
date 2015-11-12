@@ -113,13 +113,6 @@ function AddModuleController($scope, notificationService, $mdDialog, module, $me
         $mdDialog.cancel();
     }
 
-
-    //Autocomplete:
-
-    //$scope.itemChange = function(item){
-      //console.log(item);
-    //}
-
     $scope.querySearch = function (query) {
       var results = query ? $scope.roles.filter(createFilterFor(query)) : [];
       return results;

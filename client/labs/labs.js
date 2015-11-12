@@ -1,15 +1,24 @@
 angular.module("sam-1").controller("LabsListCtrl",['$scope','$meteor','ModalService','notificationService','PrintService',
     function($scope, $meteor,ModalService,notificationService,PrintService) {
 
-        $scope.labs = $meteor.collection(Labs, false);
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {name: 1};
         $scope.headers = ['Nombre', 'Descripcion','Acciones'];
 
-        $scope.showTextSearch = true;
+        Meteor.subscribe('counters', function() {
+          $scope.labsCount = $meteor.object(Counts ,'labs', false);
+         });
+
+        $scope.update = function(){
+          $scope.labs = $meteor.collection(function(){
+          return Labs.find({}, {limit: parseInt($scope.perPage),
+                                    skip: parseInt(($scope.page - 1) * $scope.perPage),
+                                    sort: $scope.sort});
+          }, false);
+        }
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddLabController,  'client/labs/addLab.tmpl.ng.html',ev, {lab:null});
-        }
-        $scope.toggleSearch = function() {
-            $scope.showTextSearch = !$scope.showTextSearch;
         }
 
         $scope.print = function(){
@@ -37,6 +46,16 @@ angular.module("sam-1").controller("LabsListCtrl",['$scope','$meteor','ModalServ
           }, false);
         }
 
+        $scope.showAll = function(){
+          $scope.perPage = $scope.labsCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 function AddLabController($scope,$mdDialog, $meteor, lab ,notificationService) {
