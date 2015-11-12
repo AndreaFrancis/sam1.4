@@ -2,8 +2,13 @@ angular.module("sam-1").controller("RolesListCtrl",['$scope','$meteor','notifica
     function($scope, $meteor,notificationService, ModalService,PrintService) {
 
          $scope.page = 1;
-         $scope.perPage = 2;
+         $scope.perPage = 3;
          $scope.sort = {name: 1};
+         $scope.headers = ['Nombre', 'Acciones'];
+
+         Meteor.subscribe('counters', function() {
+          $scope.rolesCount = $meteor.object(Counts ,'roles', false);
+         });
 
          $scope.update = function(){
           $scope.roles = $meteor.collection(function(){
@@ -12,46 +17,33 @@ angular.module("sam-1").controller("RolesListCtrl",['$scope','$meteor','notifica
                                     sort: $scope.sort});
           }, false);
         }
-        
-        Meteor.subscribe('counters', function() {
-          $scope.rolesCount = $meteor.object(Counts ,'roles', false);
-        });
-
-        
-
-        $scope.headers = ['Nombre', 'Acciones'];
-
-        $scope.showTextSearch = true;
-
+      
         $scope.showAll = function(){
           $scope.perPage = $scope.rolesCount.count;
         }
 
-        $scope.pageChanged = function(newPage) {
-          $scope.page = newPage;
-        };
-
         $scope.print = function(){
           PrintService.printRoles($scope.roles);
         }
+
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddRolController, 'client/roles/addRol.tmpl.ng.html',ev,{rol:null});
         }
-        $scope.toggleSearch = function() {
-            $scope.showTextSearch = !$scope.showTextSearch;
-        }
 
         $scope.delete = function(rol,$event, roles) {
+
           $scope.onRemoveCancel = function() {
               console.log("Se cancelo la eliminacion del usuario");
           }
           $scope.onRemoveConfirm = function() {
-            roles.remove(rol).then(function(number) {
+            if(roles!=undefined){
+              $meteor.collection(RolesData).remove(rol).then(function(number) {
                 notificationService.showSuccess("Se ha eliminado correctamente el rol");
-            }, function(error){
+              }, function(error){
                 notificationService.showError("Error en la eliminacino del rol");
                 console.log(error);
-            });
+              });
+            }
           }
           ModalService.showConfirmDialog('Eliminar rol', '¿Estas seguro de eliminar el rol?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
           $event.stopPropagation();
@@ -68,12 +60,13 @@ angular.module("sam-1").controller("RolesListCtrl",['$scope','$meteor','notifica
               }, false);
         }
 
-         $scope.pageChanged = function(newPage) {
+        $scope.pageChanged = function(newPage) {
           $scope.page = newPage;
           $scope.update();
         };
+
         $scope.update();
-    }]);
+  }]);
 
 function AddRolController($scope, notificationService, $mdDialog,rol, $meteor) {
     if(rol) {
