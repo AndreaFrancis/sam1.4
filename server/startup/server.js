@@ -27,6 +27,7 @@ if(Meteor.isServer){
 
     Meteor.publish("counters",function(){
       Counts.publish(this,"roles",RolesData.find());
+      Counts.publish(this,"modules",Modules.find());
     });
     Meteor.methods({
         createNewUser: function(user){

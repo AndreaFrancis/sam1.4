@@ -4,21 +4,34 @@
 
 angular.module("sam-1").controller("ModulesListCtrl",['$scope','$meteor','notificationService','ModalService','PrintService',
     function($scope, $meteor,notificationService, ModalService,PrintService) {
-        $scope.modules = $meteor.collection(function(){
-          return Modules.find({},{
-            transform: function(doc){
-              if(doc.roles){
-                doc.rolesObj = $meteor.collection(function(){
-                  return RolesData.find({_id:{$in:doc.roles}});
-                },false);
-              }
-              return doc;
-            }
-          });
-        },false);
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {name: 1};
         $scope.headers = ['', 'Nombre','Prioridad','Url','Roles', 'Acciones'];
 
-        $scope.showTextSearch = true;
+        Meteor.subscribe('counters', function() {
+          $scope.modulesCount = $meteor.object(Counts ,'modules', false);
+         });
+
+        $scope.update = function(){
+          $scope.modules = $meteor.collection(function(){
+            return Modules.find({},{
+              transform: function(doc){
+                if(doc.roles){
+                  doc.rolesObj = RolesData.find({_id:{$in:doc.roles}}).fetch();
+                }
+                return doc;
+              },
+              limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
+            });
+          },false);
+        }
+
+        $scope.showAll = function(){
+          $scope.perPage = $scope.modulesCount.count;
+        }
 
         $scope.print = function(){
           PrintService.printModules($scope.modules);
@@ -26,10 +39,7 @@ angular.module("sam-1").controller("ModulesListCtrl",['$scope','$meteor','notifi
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddModuleController, 'client/modules/addModule.tmpl.ng.html', ev, {module:null});
         }
-        $scope.toggleSearch = function() {
-            $scope.showTextSearch = !$scope.showTextSearch;
-        }
-
+        
         $scope.delete = function(module) {
             $scope.modules.remove(module).then(function(number) {
                 notificationService.showSuccess("Se ha eliminado correctamente el modulo");
@@ -47,15 +57,20 @@ angular.module("sam-1").controller("ModulesListCtrl",['$scope','$meteor','notifi
             return Modules.find({name : { $regex : '.*' + $scope.searchText || '' + '.*', '$options' : 'i' }},{
             transform: function(doc){
               if(doc.roles){
-                doc.rolesObj = $meteor.collection(function(){
-                  return RolesData.find({_id:{$in:doc.roles}});
-                },false);
+                doc.rolesObj = RolesData.find({_id:{$in:doc.roles}}).fetch();
               }
               return doc;
             }
           });
           },false);
         }
+
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
 
     }]);
 
@@ -101,9 +116,9 @@ function AddModuleController($scope, notificationService, $mdDialog, module, $me
 
     //Autocomplete:
 
-    $scope.itemChange = function(item){
-      console.log(item);
-    }
+    //$scope.itemChange = function(item){
+      //console.log(item);
+    //}
 
     $scope.querySearch = function (query) {
       var results = query ? $scope.roles.filter(createFilterFor(query)) : [];

@@ -28,7 +28,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="module in modules | orderBy: 'order'" class="md-table-content-row" ng-click="show(module, $event)">
+                <tr dir-paginate="module in modules | orderBy: 'order' | itemsPerPage: perPage" class="md-table-content-row" ng-click="show(module, $event)" total-items="modulesCount.count">
                     <td data-title="">
                         <i class="{{module.icon}}"></i>
                     </td>
@@ -48,6 +48,20 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div layout="row">
+            <md-input-container>
+                <label>Modulos por pagina </label>
+                <input ng-model="perPage">
+            </md-input-container>
+            <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"></dir-pagination-controls>
+            <span></span>
+            <md-button class="md-icon" aria-label="Ver todo" ng-click="showAll()">
+                <i class="fa fa-eye"></i>
+            </md-button>
+            <md-button class="md-icon" ng-click="print()" aria-label="Imprimir">
+                      <i class="fa fa-print"></i>
+            </md-button>
         </div>
     </div>
 </div>
