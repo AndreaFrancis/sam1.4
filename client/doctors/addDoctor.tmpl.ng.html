@@ -45,9 +45,6 @@
               </md-input-container>
             </div>
           <div layout="row" ng-if="isAdmin">
-            <md-checkbox ng-model="isUser" aria-label="Id de usuario">
-              Es interno
-            </md-checkbox>
             <md-select placeholder="Usuario" ng-model="selectedUser" flex required>
                 <md-option ng-repeat="us in users" ng-value="us">{{us.username}}</md-option>
             </md-select>

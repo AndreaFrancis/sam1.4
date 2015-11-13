@@ -34,6 +34,7 @@ if(Meteor.isServer){
       Counts.publish(this,"labpers",Labpersonal.find());
       Counts.publish(this,"services",Services.find());
       Counts.publish(this,"attentions",Attentions.find());
+      Counts.publish(this,"doctors",Doctors.find());
     });
 
     Meteor.methods({
