@@ -40,13 +40,20 @@ angular.module("sam-1").controller("ModulesListCtrl",['$scope','$meteor','notifi
             ModalService.showModalWithParams(AddModuleController, 'client/modules/addModule.tmpl.ng.html', ev, {module:null});
         }
         
-        $scope.delete = function(module) {
+        $scope.delete = function(module,$event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del rol");
+          }
+          $scope.onRemoveConfirm = function() {
             $scope.modules.remove(module).then(function(number) {
                 notificationService.showSuccess("Se ha eliminado correctamente el modulo");
             }, function(error){
                 notificationService.showError("Error en la eliminacino del modulo");
                 console.log(error);
             });
+          }
+          ModalService.showConfirmDialog('Eliminar modulo', '¿Estas seguro de eliminar el modulo?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
         $scope.show = function(selectedModule, ev) {
             ModalService.showModalWithParams(AddModuleController, 'client/modules/addModule.tmpl.ng.html', ev, {module:selectedModule});

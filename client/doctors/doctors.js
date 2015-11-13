@@ -112,7 +112,6 @@ function AddDoctorController($scope,$mdDialog, $meteor, doctor ,notificationServ
           $scope.doctor.userId  = $scope.selectedUser._id;
         }
 
-
         $scope.doctors.save($scope.doctor).then(function(number) {
             notificationService.showSuccess("Se ha guardado correctamente el doctor");
         }, function(error){

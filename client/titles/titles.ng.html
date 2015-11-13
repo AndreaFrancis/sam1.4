@@ -15,9 +15,6 @@
           <label>Buscar Titulo </label>
           <input ng-model="searchText" ng-change="search()">
       </md-input-container>
-      <md-button aria-label="Imprimir" ng-click="print()">
-            Imprimir
-      </md-button>
       <div class="table-responsive-vertical shadow-z-1 center-table">
           <!-- Table starts here -->
           <table id="table" class="table table-hover table-mc-light-blue">
@@ -28,9 +25,10 @@
               </tr>
               </thead>
               <tbody>
-              <tr ng-repeat="title in titles" class="md-table-content-row" ng-click="show(title, $event)">
+              <tr dir-paginate="title in titles| itemsPerPage: perPage" class="md-table-content-row" ng-click="show(title, $event)" total-items="titlesCount.count">
+
                   <td data-title="Nombre">{{ title.name }}</td>
-                  <td data-title="Analisis">{{title.analisysObj}}</td>
+                  <td data-title="Analisis">{{title.analisysObj.name}}</td>
                   <td data-title="Examenes">
                     <ul>
                       <li ng-repeat="exam in title.exams">
@@ -39,7 +37,7 @@
                     </ul>
                   </td>
                   <td data-title="Acciones">
-                      <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(title)">
+                      <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(title, $event)">
                           <i class="fa fa-trash"></i>
                       </md-button>
                   </td>
@@ -47,5 +45,19 @@
               </tbody>
           </table>
       </div>
+      <div layout="row">
+            <md-input-container>
+                <label>Items</label>
+                <input ng-model="perPage">
+            </md-input-container>
+            <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"></dir-pagination-controls>
+            <span></span>
+            <md-button class="md-icon" aria-label="Ver todo" ng-click="showAll()">
+                <i class="fa fa-eye"></i>
+            </md-button>
+            <md-button class="md-icon" ng-click="print()" aria-label="Imprimir">
+                      <i class="fa fa-print"></i>
+            </md-button>
+        </div>
     </div>
 </div>

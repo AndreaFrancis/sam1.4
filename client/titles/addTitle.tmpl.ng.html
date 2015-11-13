@@ -32,27 +32,6 @@
                 <div ng-message="required"><b>Debe</b> escoger un analisis</div>
               </div>
           </md-autocomplete>
-            <!--fieldset class="standar" ng-disabled="newExamForm.name.$invalid">
-                <legend>Pruebas</legend>
-                <div layout="row">
-                    <div layout="column">
-                        <md-select placeholder="Prueba" ng-model="selectedTest">
-                            <md-option ng-repeat="test in tests" ng-value="test">{{test.name}}</md-option>
-                        </md-select>
-                        <md-button class="md-primary" ng-click="saveTest()">
-                            &ensp;Agregar&ensp;&ensp;<span class="ion-chevron-right"></span>
-                        </md-button>
-                    </div>
-                    <md-list>
-                        <md-subheader class="md-no-sticky">Evaluaciones</md-subheader>
-                        <md-list-item ng-repeat="test in selectedTests">
-                            <div class="md-list-item-text">
-                                {{test.name}}
-                            </div>
-                        </md-list-item>
-                    </md-list>
-                </div>
-            </fieldset-->
             <div class="md-actions" layout="row">
                 <span flex></span>
                 <md-button class="md-primary" ng-click="save()" ng-disabled="titleForm.$invalid" type="submit">

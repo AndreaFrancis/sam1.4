@@ -1,30 +1,36 @@
 /**
  * Created by Andrea on 07/06/2015.
  */
-angular.module("sam-1").controller("TitlesListCtrl",['$scope','$meteor','ModalService','PrintService',
-    function($scope, $meteor, ModalService, PrintService) {
+angular.module("sam-1").controller("TitlesListCtrl",['$scope','$meteor','ModalService','PrintService','notificationService',
+    function($scope, $meteor, ModalService, PrintService,notificationService) {
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {name: 1};
         $scope.headers = ["Nombre", "Analisis", "Examenes", "Acciones"];
 
-        $scope.titles = $meteor.collection(function(){
-          return Titles.find({active:true},{
+        Meteor.subscribe('counters', function() {
+          $scope.titlesCount = $meteor.object(Counts ,'titles', false);
+        });
+
+        $scope.update = function(){
+          $scope.titles = Titles.find({active:true},{
             transform: function(doc){
               if(doc.analisys){
                 doc.analisysObj = {};
                 var obj = $meteor.object(Analisys,doc.analisys);
                 if(obj){
-                  doc.analisysObj = obj.name;
+                  doc.analisysObj = obj;
                 }
               }
-
-              var exams = $meteor.collection(function(){
-                return Exams.find({$and:[{title:doc._id},{active:true}]});
-              },false);
+              var exams = Exams.find({$and:[{title:doc._id},{active:true}]}).fetch();
               doc.exams = exams;
-
               return doc;
-            }
-          });
-        }, false);
+            },
+            limit: parseInt($scope.perPage),
+            skip: parseInt(($scope.page - 1) * $scope.perPage),
+            sort: $scope.sort
+          }).fetch();
+        }
 
         $scope.print = function(){
           PrintService.printTitles($scope.titles);
@@ -34,10 +40,18 @@ angular.module("sam-1").controller("TitlesListCtrl",['$scope','$meteor','ModalSe
             ModalService.showModalWithParams(AddTitleController, 'client/titles/addTitle.tmpl.ng.html', ev, {title: null});
         }
 
-        $scope.delete = function(title) {
-          Titles.update(title._id, {
-            $set: {active: false}
-          });
+        $scope.delete = function(title, $event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del servicio");
+          }
+          $scope.onRemoveConfirm = function() {
+            Titles.update(title._id, {
+              $set: {active: false}
+            });
+            notificationService.showSuccess("Se ha eliminado correctamente el servicio");
+          }
+          ModalService.showConfirmDialog('Eliminar titulo', '¿Estas seguro de eliminar el titulo?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
 
         $scope.show = function(selectedTitle, ev) {
@@ -45,9 +59,7 @@ angular.module("sam-1").controller("TitlesListCtrl",['$scope','$meteor','ModalSe
         }
 
         $scope.search = function(){
-          $scope.titles = $meteor.collection(function(){
-          return Titles.find(
-            {$and:[{
+           $scope.titles = Titles.find({$and:[{
                       "name" : { $regex : '.*' + $scope.searchText || '' + '.*', '$options' : 'i' }
             }, {active:true}]},{
             transform: function(doc){
@@ -55,29 +67,36 @@ angular.module("sam-1").controller("TitlesListCtrl",['$scope','$meteor','ModalSe
                 doc.analisysObj = {};
                 var obj = $meteor.object(Analisys,doc.analisys);
                 if(obj){
-                  doc.analisysObj = obj.name;
+                  doc.analisysObj = obj;
                 }
               }
-
-              var exams = $meteor.collection(function(){
-                return Exams.find({$and:[{title:doc._id},{active:true}]});
-              },false);
+              var exams = Exams.find({$and:[{title:doc._id},{active:true}]}).fetch();
               doc.exams = exams;
-
               return doc;
-            }
-          }
-          )
-          ;
-          },false);
+            },
+            limit: parseInt($scope.perPage),
+            skip: parseInt(($scope.page - 1) * $scope.perPage),
+            sort: $scope.sort
+          }).fetch();
         }
 
+        $scope.showAll = function(){
+          $scope.perPage = $scope.titlesCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 function AddTitleController($scope, $meteor, notificationService, title, $mdDialog) {
     $scope.selectedAnalisys = {};
     if(title){
       $scope.title = title;
+      $scope.selectedAnalisys = $meteor.object(Analisys, $scope.title.analisys);
     }
 
     $scope.titles = $meteor.collection(Titles, false);

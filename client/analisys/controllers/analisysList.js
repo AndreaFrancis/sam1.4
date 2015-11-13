@@ -1,37 +1,52 @@
 /**
  * Created by Andrea on 07/06/2015.
  */
-angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','ModalService','PrintService',
-    function($scope, $meteor, ModalService, PrintService) {
+angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','ModalService','PrintService','notificationService',
+    function($scope, $meteor, ModalService, PrintService,notificationService) {
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {name: 1};
         var userRol = localStorage.getItem("rolName");
         $scope.isAdmin = userRol=="Admin";
+        $scope.headers = ['Nombre','Titulos','Lab','Descripcion','Acciones'];
+        Meteor.subscribe('counters', function() {
+          $scope.analisysCount = $meteor.object(Counts ,'analisys', false);
+        });
 
-        $scope.analisysList = $meteor.collection(function(){
+        $scope.update = function(){
+          $scope.analisysList = $meteor.collection(function(){
           return Analisys.find({active:true},{
             transform: function(doc){
-                doc.titles = $meteor.collection(function(){
-                  return Titles.find({analisys:doc._id});
-                },false);
-
+                doc.titles = Titles.find({analisys:doc._id}).fetch();
                 var obj = $meteor.object(Labs,doc.lab);
                 if(obj){
-                  doc.labObj = obj.name;
+                 doc.labObj = obj.name;
                 }
               return doc;
-            }
+            },
+            limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
           });
-        }, false);
-
-        $scope.headers = ['Lab','Nombre','Titulos','Descripcion','Acciones'];
+          }, false);
+        }
 
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddAnalisysController, 'client/analisys/views/addAnalisys.tmpl.ng.html', ev, {analisys:null});
         }
 
-        $scope.delete = function(analisys) {
-          Analisys.update(analisys._id, {
-            $set: {active: false}
-          });
+        $scope.delete = function(analisys, $event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del rol");
+          }
+          $scope.onRemoveConfirm = function() {
+            Analisys.update(analisys._id, {
+              $set: {active: false}
+            });
+            notificationService.showSuccess("Se ha eliminado correctamente el doctor");
+          }
+          ModalService.showConfirmDialog('Eliminar analisis', '¿Estas seguro de eliminar el analisis?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
 
         $scope.show = function(selectedAnal, ev) {
@@ -41,30 +56,30 @@ angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','Modal
 
         $scope.search = function(){
           $scope.analisysList = $meteor.collection(function(){
-          return Analisys.find(
-            {$and:[{
+          return Analisys.find({$and:[{
                       "name" : { $regex : '.*' + $scope.searchText || '' + '.*', '$options' : 'i' }
             }, {active:true}]},{
             transform: function(doc){
-                doc.titles = $meteor.collection(function(){
-                  return Titles.find({analisys:doc._id});
-                },false);
+                doc.titles = Titles.find({analisys:doc._id}).fetch();
+                var obj = $meteor.object(Labs,doc.lab);
+                if(obj){
+                 doc.labObj = obj.name;
+                }
               return doc;
-            }
-          }
-          )
-          ;
-          },false);
+            },
+            limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
+          });
+          }, false);
         }
-
+        
         $scope.catalog = $meteor.collection(function(){
-          return Analisys.find({},{
+          return Analisys.find({active:true},{
           transform: function(doc){
-              doc.titles = $meteor.collection(function(){
-                return Titles.find({analisys:doc._id},{
+              doc.titles = Titles.find({analisys:doc._id},{
                   transform: function(tit){
-                    tit.exams = $meteor.collection(function(){
-                      return Exams.find({title:tit._id},{
+                    tit.exams = Exams.find({title:tit._id},{
                         transform: function(exam){
                           if(exam.measure){
                             var measure = $meteor.object(Measures,exam.measure);
@@ -81,12 +96,10 @@ angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','Modal
                           }
                           return exam;
                         }
-                      });
-                    })
+                      }).fetch();
                     return tit;
                   }
-                });
-              },false);
+                }).fetch();
             return doc;
           }
         });
@@ -100,11 +113,22 @@ angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','Modal
           PrintService.printAnalisys($scope.analisysList);
         }
 
+        $scope.showAll = function(){
+          $scope.perPage = $scope.analisysCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 function AddAnalisysController($scope, $meteor, notificationService, analisys,$mdDialog) {
     if(analisys){
       $scope.analisys = analisys;
+      $scope.selectedLab = $meteor.object(Labs, $scope.analisys.lab);
     }
 
     $scope.analisysList = $meteor.collection(Analisys, false);
@@ -126,6 +150,7 @@ function AddAnalisysController($scope, $meteor, notificationService, analisys,$m
     $scope.save = function() {
         //Cleaning data from transform
         delete $scope.analisys.titles;
+        delete $scope.analisys.labObj;
 
         if($scope.selectedLab){
           $scope.analisys.lab = $scope.selectedLab._id;

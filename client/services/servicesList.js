@@ -5,7 +5,7 @@ angular.module("sam-1").controller("ServicesListCtrl",['$scope','$meteor','$root
     function($scope, $meteor,  $rootScope,notificationService, ModalService,PrintService) {
         $scope.page = 1;
         $scope.perPage = 3;
-        $scope.sort = {username: 1};
+        $scope.sort = {name: 1};
         $scope.headers = ['Nombre', 'Descripcion', 'Acciones'];
         
         Meteor.subscribe('counters', function() {

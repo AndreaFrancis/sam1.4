@@ -210,11 +210,26 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
 });
 
 
-angular.module('sam-1').service("PrintService", function(){
+angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
     this.printCatalog = function(catalog){
       var newWin= window.open("");
-      newWin.document.write("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><style type='text/css'>table {width:100%} table, th, td {border: 1px solid black;}</style></head><body>");
-      newWin.document.write("<h2>Listado de analisis</h2>");
+      var style = "<style type='text/css'>table, th, td {border: 1px solid black;}"+
+                      "body {font-family: 'Verdana', Geneva, sans-serif;font-size:8pt}"+
+                      "header nav, footer {display: none;}"+
+                      "table {font-size:8pt; border-collapse:collapse}"+
+                      "h1 {text-align: center}"+
+                      ".header {text-align: right;}"+
+                      "@page {size:auto;margin: 10mm;}"+
+                      " .break { page-break-after: always; }"+
+                      " body {  }"+
+                      " tr {page-break-inside: avoid !important;} "+
+                      "</style>";
+      newWin.document.write("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>"+style+"</head><body>")
+      newWin.document.write("<b class='header'>COMPLEJO HOSPITALARIO VIEDMA</b><br/>");
+      newWin.document.write("<b class='header'>Instituto de Gastroenterología Boliviano Japonés</b><br/>");
+      newWin.document.write("<b class='header'>Cochabamba - Bolivia</b><br/>");
+      newWin.document.write("<h1>Listado de analisis</h1>");
+      newWin.document.write("<hr>");
       angular.forEach(catalog, function(analisys){
         newWin.document.write("<h3>"+analisys.name+"</h3>");
         newWin.document.write("<ul>");
@@ -364,12 +379,13 @@ angular.module('sam-1').service("PrintService", function(){
         text+="<td>"+counter+"</td>";
         text+="<td>"+title.name+"</td>";
         text+="<td>"+title.analisysObj+"</td>";
+        text+="<td>";
         text+= "<ul>";
         angular.forEach(title.exams, function(ex){
           text+="<li>"+ex.name+"</li>";
         });
         text+= "</ul>";
-
+        text+="</td>";
         text+="</tr>";
         counter++;
       });
@@ -501,8 +517,8 @@ angular.module('sam-1').service("PrintService", function(){
         text+="<tr>";
         text+="<td>"+counter+"</td>";
         text+="<td>"+a.name+"</td>";
-        text+="<td>"+a.labObj||""+"</td>";
-        text+="<td>"+a.description||""+"</td>";
+        text+="<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(a.labObj)+"</td>";
+        text+="<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(a.description)+"</td>";
         text+="</tr>";
         counter++;
       });
@@ -529,6 +545,7 @@ angular.module('sam-1').service("PrintService", function(){
       newWin.document.write("<b class='header'>Instituto de Gastroenterología Boliviano Japonés</b><br/>");
       newWin.document.write("<b class='header'>Cochabamba - Bolivia</b><br/>");
       newWin.document.write("<h1>"+title+"</h1>");
+      newWin.document.write("<hr>");
       newWin.document.write("<table>");
       newWin.document.write(text);
       newWin.document.write("</table>");
