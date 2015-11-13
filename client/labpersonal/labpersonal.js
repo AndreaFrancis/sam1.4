@@ -116,6 +116,8 @@ function AddLabpersonalController($scope,$mdDialog, $meteor, pers ,notificationS
     }
 
     $scope.save = function() {
+        delete $scope.pers.userObj;
+        delete $scope.pers.labObj;
         if($scope.selectedUser){
           $scope.pers.user  = $scope.selectedUser._id;
         }

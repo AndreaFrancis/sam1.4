@@ -343,12 +343,13 @@ angular.module('sam-1').service("PrintService", function(){
     }
 
     this.printAttentions = function(attentions) {
-      var text = "<tr><th>Nro</th><th>Nombre</th></tr>";
+      var text = "<tr><th>Nro</th><th>Nombre</th><th>Descripcion</th></tr>";
       var counter = 1;
       angular.forEach(attentions, function(attention){
         text+="<tr>";
         text+="<td>"+counter+"</td>";
         text+="<td>"+attention.name+"</td>";
+        text+="<td>"+attention.description+"</td>";
         text+="</tr>";
         counter++;
       });
@@ -376,12 +377,13 @@ angular.module('sam-1').service("PrintService", function(){
     }
 
     this.printServices = function(services) {
-      var text = "<tr><th>Nro</th><th>Nombre</th></tr>";
+      var text = "<tr><th>Nro</th><th>Nombre</th><th>Descripcion</th></tr>";
       var counter = 1;
       angular.forEach(services, function(service){
         text+="<tr>";
         text+="<td>"+counter+"</td>";
         text+="<td>"+service.name+"</td>";
+        text+="<td>"+service.description+"</td>";
         text+="</tr>";
         counter++;
       });

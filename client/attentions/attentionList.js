@@ -6,28 +6,46 @@
  */
 angular.module("sam-1").controller("AttentionsListCtrl",['$scope','$meteor','notificationService','ModalService','PrintService',
     function($scope, $meteor,notificationService, ModalService,PrintService) {
-        $scope.attentions = $meteor.collection(Attentions, false);
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {name: 1};
         $scope.headers = ['Nombre', 'Descripcion', 'Acciones'];
 
-        $scope.showTextSearch = true;
+        Meteor.subscribe('counters', function() {
+          $scope.attentionsCount = $meteor.object(Counts ,'attentions', false);
+        });
+
+        $scope.update = function(){
+          $scope.attentions = $meteor.collection(function(){
+            return Attentions.find({},{
+              limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
+            });
+          }, false);
+        }
 
         $scope.print = function(){
-          PrintService.printRoles($scope.attentions);
+          PrintService.printAttentions($scope.attentions);
         }
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddAttentionController, 'client/attentions/addAttention.tmpl.ng.html', ev, {attention:null});
         }
-        $scope.toggleSearch = function() {
-            $scope.showTextSearch = !$scope.showTextSearch;
-        }
-
-        $scope.delete = function(attention) {
-          $scope.attentions.remove(attention).then(function(number) {
+        
+        $scope.delete = function(attention,$event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del rol");
+          }
+          $scope.onRemoveConfirm = function() {
+            $scope.attentions.remove(attention).then(function(number) {
               notificationService.showSuccess("Se ha eliminado correctamente el tipo de atencion");
-          }, function(error){
+            }, function(error){
               notificationService.showError("Error en la eliminacino del tipo de atencion");
               console.log(error);
-          });
+            });
+          }
+          ModalService.showConfirmDialog('Eliminar atencion', '¿Estas seguro de eliminar el tipo de atencion?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
 
         $scope.show = function(selectedAtt, ev) {
@@ -44,6 +62,16 @@ angular.module("sam-1").controller("AttentionsListCtrl",['$scope','$meteor','not
           },false);
         }
 
+        $scope.showAll = function(){
+          $scope.perPage = $scope.attentionsCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 function AddAttentionController($scope, notificationService, $mdDialog, attention, $meteor) {
