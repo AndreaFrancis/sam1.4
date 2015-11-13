@@ -12,6 +12,8 @@ function verifyText(textToVerify){
 angular.module("sam-1").controller("StudiesListCtrl",['$scope','$meteor','notificationService','ModalService','$state',
     function($scope, $meteor,notificationService, ModalService, $state) {
 
+        $scope.page = 1;
+        $scope.perPage = 3;
         var query = {};
         var conditionNotProgramed = {$or:
           [
@@ -31,39 +33,36 @@ angular.module("sam-1").controller("StudiesListCtrl",['$scope','$meteor','notifi
         }
 
 
-        $scope.studies = $meteor.collection(function() {
-            return Studies.find(query, {
+         Meteor.subscribe('counters', function() {
+          $scope.studiesCount = $meteor.object(Counts ,'studies', false);
+         });
+
+         $scope.update = function(){
+          $scope.studies = Studies.find(query, {
                 transform: function(doc) {
                     doc.patientObj = {};
                     if(doc.patient) {
-                        var patientObj = $meteor.collection(function(){
-                            return Patients.find({_id: {"$in": [doc.patient]}});
-                        });
-                        doc.patientObj = patientObj[0];
+                        doc.patientObj = $meteor.object(Patients, doc.patient);
                     }
 
                     doc.doctorObj = {};
                     if(!!doc.doctor){
-                      var doctorObj = $meteor.collection(function(){
-                          return Doctors.find({_id: {"$in": [doc.doctor]}});
-                      });
-                      doc.doctorObj = doctorObj[0];
+                      doc.doctorObj = $meteor.object(Doctors, doc.doctor);
                     }
 
                     doc.creatorName = {};
                     if(doc.creatorId) {
-                        var creatorName = $meteor.collection(function(){
-                            return Users.find({_id: {"$in": [doc.creatorId]}});
-                        });
-                        if(creatorName[0]) {
-                            doc.creatorName = creatorName[0].profile.name + " "+ creatorName[0].profile.lastName;
+                        var creatorName = $meteor.object(Users, doc.creatorId);
+                        if(creatorName) {
+                            doc.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
                         }
                     }
-
                     return doc;
-                }
-            });
-        }, false);
+                },
+                limit: parseInt($scope.perPage),
+                skip: parseInt(($scope.page - 1) * $scope.perPage)
+            }).fetch();
+        }
 
         $scope.show = function(study, ev) {
             $state.go('study',{studyId:study._id});
@@ -77,6 +76,16 @@ angular.module("sam-1").controller("StudiesListCtrl",['$scope','$meteor','notifi
           event.stopPropagation();
           ModalService.showModalWithParams('AddReasonController',  'client/studies/addReason.tmpl.ng.html',event, {study:study});
         }
+
+        $scope.showAll = function(){
+          $scope.perPage = $scope.studiesCount.count;
+        }
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
 }]);
 
 angular.module("sam-1").controller("AddReasonController",AddReasonController);
@@ -119,22 +128,18 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
     $scope.conditions = CONDITIONS;
     $scope.isBioquimic = userRol=="Bioquimico";
     $scope.isDoctor = userRol=="Doctor";
-
+    $scope.newDoctor = {};
+    $scope.study.creationDate = new Date();
     $scope.labs = $meteor.collection(Labs,false);
     $scope.labsCounter = [];
     angular.forEach($scope.labs, function(lab){
       $scope.labsCounter.push({lab:lab._id, counter:0});
     });
-
-    $scope.newDoctor = {};
-    $scope.study.creationDate = new Date();
-
+    
     if($scope.isDoctor){
-      var doctor = $meteor.collection(function(){
-          return Doctors.find({userId: localStorage.getItem("user")});
-      });
-      if(doctor.length>0){
-        $scope.selectedDoctor = doctor[0];
+      var doctor = Doctors.findOne({userId: localStorage.getItem("user")});
+      if(doctor){
+        $scope.selectedDoctor = doctor;
       }
     }
     if(patientId){
@@ -144,47 +149,49 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
     }else{
         $scope.study = {};
         $scope.study.internData = {};
-        $scope.patients = $meteor.collection(
-        function() {
-            return Patients.find({}, {
+        $scope.patients = Patients.find({}, {
                 transform: function(doc) {
                     doc.value = (doc.lastName||"")+ " "+ (doc.lastNameMother||"") + " "+doc.name;
                     return doc;
                 }
-            });
-        }, false);
+            }).fetch();
     }
 
     $scope.attentions = $meteor.collection(Attentions, false);
     $scope.services = $meteor.collection(Services, false);
-    $scope.doctors = $meteor.collection(function(){
-      return Doctors.find({},{
+    $scope.doctors = Doctors.find({},{
         transform: function(doc){
           doc.value = doc.name +" "+ doc.lastName;
           return doc;
         }
-      });
-    }, false);
+      }).fetch();
 
     $scope.studies = $meteor.collection(Studies, false);
-    $scope.analisysList = $meteor.collection(function(){
-      return Analisys.find({active:true},{
+    $scope.analisysList = Analisys.find({active:true},{
           transform: function(anDoc){
-            anDoc.titles = $meteor.collection(function(){
-              return Titles.find({$and:[{active:true},{analisys:anDoc._id}]},{
+            anDoc.titles = Titles.find({$and:[{active:true},{analisys:anDoc._id}]},{
                 transform: function(titDoc){
-                    titDoc.exams = $meteor.collection(function(){
-                      return Exams.find({$and:[{active:true},{title:titDoc._id}]});
-                    },false);
+                    titDoc.exams = Exams.find({$and:[{active:true},{title:titDoc._id}]}).fetch();
                   return titDoc;
                 }
-              });
-            },false);
+              }).fetch();
             return anDoc;
           }
-      });
-    },false);
+      }).fetch();
 
+
+    $scope.searchBill = function($event){
+      Meteor.call("findPatientByPay", $scope.study.bill, function(err,res) {
+              if(err) {
+                  notificationService.showError("No se encontro la factura");
+                  console.log(err);
+              }else{
+                  $scope.selectedItem = res;
+                  $scope.$apply();
+              }
+      });
+      $event.stopPropagation();
+    }
     $scope.createNewDoctor = function(ev){
       ModalService.showModalWithParams('AddDoctorController',  'client/doctors/addDoctor.tmpl.ng.html',ev, {doctor:null});
     }

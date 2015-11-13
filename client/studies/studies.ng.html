@@ -23,7 +23,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr class="md-table-content-row" ng-repeat="study in studies | orderBy: '-creationDate'" ng-click="show(study, $event)">
+                <tr class="md-table-content-row" dir-paginate="study in studies | orderBy: '-creationDate' | itemsPerPage: perPage" ng-click="show(study, $event)" total-items="studiesCount.count">
+
                     <td data-title="Codigo">{{ study.dailyCode }}</td>
                     <td data-title="Paciente">{{study.patientObj.name}} {{study.patientObj.lastName}} {{study.patientObj.lastNameMother}}</td>
                     <td data-title="Fecha">{{study.creationDate.toLocaleString()}}</td>
@@ -35,6 +36,17 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div layout="row">
+            <md-input-container>
+                <label>Items</label>
+                <input ng-model="perPage">
+            </md-input-container>
+            <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"></dir-pagination-controls>
+            <span></span>
+            <md-button class="md-icon" aria-label="Ver todo" ng-click="showAll()">
+                <i class="fa fa-eye"></i>
+            </md-button>
         </div>
     </div>
 </div>

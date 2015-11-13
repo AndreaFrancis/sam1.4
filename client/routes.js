@@ -1,7 +1,3 @@
-/**
- * Created by Andrea on 07/06/2015.
- */
-/**Router config**/
 angular.module("sam-1").config(['$urlRouterProvider', '$stateProvider', '$locationProvider',
     function($urlRouterProvider, $stateProvider, $locationProvider){
         $locationProvider.html5Mode(true);
@@ -48,7 +44,7 @@ angular.module("sam-1").config(['$urlRouterProvider', '$stateProvider', '$locati
                 }
             })
             .state('start', {
-                url: '/start',
+                url: '/',
                 templateUrl: 'client/starter/start.ng.html',
                 controller: 'DashboardCtrl',
                 data: {
@@ -191,7 +187,7 @@ angular.module("sam-1").config(['$urlRouterProvider', '$stateProvider', '$locati
                 requireLogin: true
               }
             });
-        $urlRouterProvider.otherwise("/start");
+        $urlRouterProvider.otherwise('/');
     }]);
 
 

@@ -6,27 +6,22 @@ angular.module("sam-1").controller("PatientCtrl", ['$scope', '$stateParams','$me
         $scope.patient = $meteor.object(Patients, $stateParams.patientId);
 
         $scope.showAll = function(){
-          $scope.studies = $meteor.collection(function(){
-              return Studies.find({patient:  $scope.patient._id}, {
+          $scope.studies = Studies.find({patient:  $scope.patient._id}, {
                   transform: function(doc){
                       doc.creatorName = {};
                       if(doc.creatorId) {
-                          var creatorName = $meteor.collection(function(){
-                              return Users.find({_id: {"$in": [doc.creatorId]}});
-                          });
-                          if(creatorName[0]) {
-                              doc.creatorName = creatorName[0].profile.name + " "+ creatorName[0].profile.lastName;
+                          var creatorName = $meteor.object(Users,doc.creatorId);
+                          if(creatorName) {
+                              doc.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
                           }
                       }
                       return doc;
                   }
-              });
-          }, false);
+              }).fetch();
         }
 
         $scope.showDate = function(pInitialDate, pEndDate){
-          $scope.studies = $meteor.collection(function(){
-              return Studies.find({
+          $scope.studies = Studies.find({
                 $and:[
                   {patient:  $scope.patient._id},
                   {"creationDate": {"$gte": pInitialDate, "$lt": pEndDate}}
@@ -35,17 +30,14 @@ angular.module("sam-1").controller("PatientCtrl", ['$scope', '$stateParams','$me
                   transform: function(doc){
                       doc.creatorName = {};
                       if(doc.creatorId) {
-                          var creatorName = $meteor.collection(function(){
-                              return Users.find({_id: {"$in": [doc.creatorId]}});
-                          });
-                          if(creatorName[0]) {
-                              doc.creatorName = creatorName[0].profile.name + " "+ creatorName[0].profile.lastName;
+                          var creatorName = $meteor.object(Users, doc.creatorId);
+                          if(creatorName) {
+                              doc.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
                           }
                       }
                       return doc;
                   }
-              });
-          }, false);
+              }).fetch();
         }
 
         $scope.goPatients = function(){
@@ -69,23 +61,10 @@ angular.module("sam-1").controller("PatientCtrl", ['$scope', '$stateParams','$me
               console.log("Se cancelo la eliminacion del pacientes");
             }
             var onRemoveSuccess = function() {
-                //Studies.remove({patient:$scope.patient._id});
-                var  studies = $meteor.collection(function(){
-                    return Studies.find({patient:$scope.patient._id});
-                },false);
+                var  studies = Studies.find({patient:$scope.patient._id}).fetch();
                 $meteor.collection(Studies,false).remove(studies);
-
                Patients.remove($scope.patient._id);
                $state.go('patients');
-               //notificationService.showSuccess("Se ha eliminado correctamente al paciente");
-               //var patients = $meteor.collection(Patients,false);
-               /*
-               $scope.patients.remove(patient).then(function(number) {
-                notificationService.showSuccess("Se ha eliminado correctamente al paciente");
-                }, function(error){
-                  notificationService.showError("Error en la eliminacino del paciente");
-                console.log(error);
-                });)*/
             }
             ModalService.showConfirmDialog('Eliminar paciente', '¿Estas seguro de eliminar los datos del paciente?, Se eliminaran los estudios vinculados al mismo', 'Eliminar', 'Cancelar', event, onRemoveCancel, onRemoveSuccess);
         }
@@ -97,7 +76,216 @@ angular.module("sam-1").controller("PatientCtrl", ['$scope', '$stateParams','$me
         $scope.showAll();
     }]);
 
-function AddStudyController($scope, $mdDialog, $meteor, notificationService, patient) {
+function AddStudyController($scope, $meteor, notificationService, $stateParams, ModalService,$state, CONDITIONS) {
+    var patientId =  $stateParams.patientId;
+    var userRol = localStorage.getItem("rolName");
+    $scope.study = {};
+    $scope.conditions = CONDITIONS;
+    $scope.isBioquimic = userRol=="Bioquimico";
+    $scope.isDoctor = userRol=="Doctor";
+    $scope.newDoctor = {};
+    $scope.study.creationDate = new Date();
+    $scope.labs = $meteor.collection(Labs,false);
+    $scope.labsCounter = [];
+    angular.forEach($scope.labs, function(lab){
+      $scope.labsCounter.push({lab:lab._id, counter:0});
+    });
+    
+    if($scope.isDoctor){
+      var doctor = Doctors.findOne({userId: localStorage.getItem("user")});
+      if(doctor){
+        $scope.selectedDoctor = doctor;
+      }
+    }
+    if(patientId){
+        $scope.patient = $meteor.object(Patients, patientId);
+        $scope.existingPatient = true;
+
+    }else{
+        $scope.study = {};
+        $scope.study.internData = {};
+        $scope.patients = Patients.find({}, {
+                transform: function(doc) {
+                    doc.value = (doc.lastName||"")+ " "+ (doc.lastNameMother||"") + " "+doc.name;
+                    return doc;
+                }
+            }).fetch();
+    }
+
+    $scope.attentions = $meteor.collection(Attentions, false);
+    $scope.services = $meteor.collection(Services, false);
+    $scope.doctors = Doctors.find({},{
+        transform: function(doc){
+          doc.value = doc.name +" "+ doc.lastName;
+          return doc;
+        }
+      }).fetch();
+
+    $scope.studies = $meteor.collection(Studies, false);
+    $scope.analisysList = Analisys.find({active:true},{
+          transform: function(anDoc){
+            anDoc.titles = Titles.find({$and:[{active:true},{analisys:anDoc._id}]},{
+                transform: function(titDoc){
+                    titDoc.exams = Exams.find({$and:[{active:true},{title:titDoc._id}]}).fetch();
+                  return titDoc;
+                }
+              }).fetch();
+            return anDoc;
+          }
+      }).fetch();
+
+    $scope.createNewDoctor = function(ev){
+      ModalService.showModalWithParams('AddDoctorController',  'client/doctors/addDoctor.tmpl.ng.html',ev, {doctor:null});
+    }
+
+    $scope.createNewPatient = function(ev){
+      ModalService.showModalWithParams('AddPatientController', 'client/patients/addPatient.tmpl.ng.html', ev, {patient:null});
+    }
+
+    $scope.changeAttention = function(){
+      var attentionJson = $scope.selectedAttention;
+      $scope.internData = attentionJson.name==CONDITIONS.INTERN_PATIENT;
+      if($scope.internData) {
+        $scope.study.internData = {};
+      }else{
+        delete $scope.study.internData;
+      }
+    }
+
+    $scope.selectAnalisys = function(analisys) {
+        angular.forEach(analisys.titles, function(title) {
+            $scope.selectTitle(title);
+            title.selected = !analisys.selected;
+        });
+    };
+
+    $scope.selectTitle = function(title) {
+        angular.forEach(title.exams, function(exam) {
+            exam.selected = !title.selected;
+        });
+    }
+
+    $scope.save = function() {
+
+        $scope.study.analisys = [];
+        var attentionJson = JSON.parse($scope.selectedAttention);
+        $scope.study.attention = attentionJson._id;
+        var serviceJson = JSON.parse($scope.selectedService);
+        $scope.study.service = serviceJson._id;
+        angular.forEach($scope.analisysList, function(analisys)  {
+            var component = {};
+            component.titles = [];
+            angular.forEach(analisys.titles, function(title){
+                var titleComponent = {};
+                titleComponent.exams = [];
+                if(title.selected && !analisys.selected){
+                    analisys.selected = true;
+                };
+                angular.forEach(title.exams, function(exam){
+                  var examComponent = {};
+                  if(exam.selected) {
+                    examComponent.exam = exam._id;
+                    examComponent.historial = [];
+                    titleComponent.exams.push(examComponent);
+                      if(!title.selected){
+                          title.selected = true;
+                          if(!analisys.selected) {
+                              analisys.selected = true;
+                          }
+                      };
+                  }
+                });
+
+                if(title.selected) {
+                    titleComponent.title = title._id;
+                    component.titles.push(titleComponent);
+                }
+            });
+            if(analisys.selected){
+                component.analisys = analisys._id;
+                $scope.study.analisys.push(component);
+                $scope.incrementAcordingToLab(analisys.lab);
+            }
+        });
+        if(localStorage.getItem("rol") == "Doctor"){
+            $scope.study.doctorUser = localStorage.getItem("user");
+        }
+        $scope.study.doctor = $scope.selectedDoctor._id;
+
+        $scope.study.creatorId = localStorage.getItem("user");
+        if($scope.patient) {
+            $scope.study.patient = $scope.patient._id;
+        }else {
+            $scope.study.patient = $scope.selectedItem._id;
+        }
+
+        $scope.study.labsCounter = $scope.labsCounter;
+
+        $scope.studies.save($scope.study).then(function(number) {
+            notificationService.showSuccess("Se ha registrado correctamente el estudio");
+        }, function(error){
+            notificationService.showError("Error en el registro del estudio");
+            console.log(error);
+        });
+        $state.go("studies");
+    }
+
+    $scope.incrementAcordingToLab = function(lab){
+      var result = _.findWhere($scope.labsCounter, {lab: lab});
+      if(result){
+        var counter = result.counter+1;
+        result.counter = counter;
+      }
+    }
+
+    $scope.selectedItemChange = function(patient){
+      $scope.selectedItem = patient;
+    }
+    $scope.selectedDoctorChange = function(doctor){
+      $scope.selectedDoctor = doctor;
+    }
+    $scope.cancel = function() {
+        $state.go("studies");
+    }
+
+    $scope.saveNewDoctor = function(){
+        $scope.doctors.save($scope.newDoctor).then(function(number) {
+
+        }, function(error){
+            notificationService.showError("Error en el registro del rol");
+            console.log(error);
+        });
+        $scope.newDoctor = '';
+        $scope.createNewDoctor = false;
+    }
+
+    /**AUTOCOMPLETE**/
+    $scope.isDisabled    = false;
+
+    $scope.querySearch = function (query) {
+        return query ? $scope.patients.filter( createFilterFor(query) ) : [];
+    }
+
+    function createFilterFor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+        return function filterFn(item) {
+            return (item.value.toLowerCase().indexOf(lowercaseQuery) >= 0);
+        };
+    }
+
+    $scope.queryDoctors = function(query) {
+        return query ? $scope.doctors.filter( createFilterForDoctor(query) ) : [];
+    }
+
+    function createFilterForDoctor(query) {
+        var lowercaseQuery = angular.lowercase(query);
+        return function filterFn(item) {
+            return (item.name.toLowerCase().indexOf(lowercaseQuery) >= 0);
+        };
+    }
+}
+
+/*function AddStudyController($scope, $mdDialog, $meteor, notificationService, patient) {
     $scope.isDoctor = localStorage.getItem("rol") == "Doctor";
     $scope.existingStudy = false;
     if(patient){
@@ -230,4 +418,4 @@ function AddStudyController($scope, $mdDialog, $meteor, notificationService, pat
     $scope.cancel = function() {
         $mdDialog.cancel();
     }
-}
+}*/

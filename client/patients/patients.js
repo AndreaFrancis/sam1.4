@@ -3,10 +3,25 @@
  */
 angular.module("sam-1").controller("PatientsListCtrl",['$scope','notificationService','ModalService','$rootScope','$state','$meteor','PrintService',
     function($scope,notificationService, ModalService, $rootScope, $state, $meteor,PrintService) {
-
-
-        $scope.patients = $meteor.collection(Patients, false);
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {lastName: 1};
         $scope.headers = ['Apellidos', 'Nombre','Ci', 'Acciones'];
+        
+        Meteor.subscribe('counters', function() {
+          $scope.patientsCount = $meteor.object(Counts ,'patients', false);
+         });
+
+        $scope.update = function(){
+          $scope.patients = $meteor.collection(function(){
+            return Patients.find({},{
+              limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
+            });
+          },false);
+        }
+
         $scope.searchText = '';
         var userRol = localStorage.getItem("rolName");
         $scope.isBioquimic = userRol=="Bioquimico";
@@ -28,7 +43,6 @@ angular.module("sam-1").controller("PatientsListCtrl",['$scope','notificationSer
         }
 
         $scope.search = function(){
-              /*
               $scope.patients = $meteor.collection(function(){
                 return Patients.find({'$or':[
                   {
@@ -41,17 +55,18 @@ angular.module("sam-1").controller("PatientsListCtrl",['$scope','notificationSer
                       ci : { $regex : '.*' + $scope.searchText || '' + '.*', '$options' : 'i' }
                   }
                 ]});
-              }, false);*/
-
-              Meteor.call("findPatient", $scope.searchText, function(err, result) {
-                  if(err) {
-                      notificationService.showError("No se pudo conectar al servidor SQL");
-                      console.log(err);
-                  }else{
-                      alert(result);
-                  }
-              });
+              }, false);
         }
+
+        $scope.showAll = function(){
+          $scope.perPage = $scope.patientsCount.count;
+        }
+         $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 

@@ -3,7 +3,17 @@
 
   <md-whiteframe class="md-whiteframe-z1" layout="column">
         <md-content class="md-padding" id="general">
-          <!--div layout="row">
+          <div layout="row">
+            <md-input-container flex ng-if="isBioquimic">
+              <label>Nro. Factura</label>
+              <input ng-model="study.bill"  name="bill" input-numeric>
+              <div ng-messages="newStudyForm.bill.$error" ng-if="newStudyForm.bill.$dirty">
+                      <div ng-message="inputNumeric">*Ingrese solo numeros</div>
+              </div>
+            </md-input-container>
+            <md-button class="md-icon-button" flex  aria-label="Buscar" ng-click="searchBill($event)">
+                            <i class="fa fa-plus"></i>
+            </md-button>
             <md-input-container flex ng-if="isBioquimic">
               <label>Codigo</label>
               <input ng-model="study.dailyCode"  name="dailyCode" daily-study date="{{study.creationDate.toString()}}"  code="{{study.dailyCode}}">
@@ -11,29 +21,24 @@
                   <div ng-message="duplicated">*El estudio ya fue programado en la fecha indicada</div>
               </div>
             </md-input-container>
-            <md-input-container flex ng-if="isBioquimic">
-              <label>Nro. Factura</label>
-              <input ng-model="study.bill"  name="bill" input-numeric>
-              <div ng-messages="newStudyForm.bill.$error" ng-if="newStudyForm.bill.$dirty">
-                      <div ng-message="inputNumeric">*Ingrese solo numeros</div>
-                  </div>
-
+            <md-input-container flex>
+                  <label>Fecha</label>
+                  <input ng-model="study.creationDate"  name="creationDate" type="date">
             </md-input-container>
-          </div-->
-          <!--div layout="row">
+          </div>
+          <div layout="row">
                   <div ng-show="existingPatient || isExistingStudy">
                       <b>Paciente</b>: {{patient.lastName}} {{patient.lastNameMother}} {{patient.name}}
                   </div>
                   <div layout="row" ng-hide="existingPatient || isExistingStudy">
                       <md-autocomplete
-                              required
                               md-search-text-change="null"
                               md-no-cache="noCache"
                               md-selected-item="selectedItem"
                               md-search-text="searchText"
                               md-selected-item-change="selectedItemChange(item)"
                               md-items="item in querySearch(searchText)"
-                              md-item-text="item.value"
+                              md-item-text="item.name"
                               md-min-length="0"
                               placeholder="Paciente"
                               md-floating-label="Paciente"
@@ -49,9 +54,9 @@
                           </span>
                           </md-item-template>
                       </md-autocomplete>
-                      <md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewPatient($event)" ng-if="isBioquimic">
+                      <!--md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewPatient($event)" ng-if="isBioquimic">
                           <i class="fa fa-plus"></i>
-                      </md-button>
+                      </md-button-->
                   </div>
                   <div flex layout="row">
                     <div ng-show="existingDoctor ||isExistingStudy || isDoctor">
@@ -85,22 +90,15 @@
                         </md-button>
                       </div>
                   </div>
-              </div-->
-              <!--div layout="row">
-                <md-select placeholder="Atencion" ng-model="selectedAttention" flex ng-change="changeAttention()" required>
+              </div>
+              <div layout="row">
+                <md-select placeholder="Atencion" ng-model="selectedAttention" flex ng-change="changeAttention()">
                     <md-option ng-repeat="attention in attentions" value="{{attention}}">{{attention.name}}</md-option>
                 </md-select>
-                <md-select placeholder="Servicio" ng-model="selectedService" flex required>
+                <md-select placeholder="Servicio" ng-model="selectedService" flex>
                     <md-option ng-repeat="service in services" value="{{service}}">{{service.name}}</md-option>
                 </md-select>
-              </div-->
-
-              <!--div layout="row">
-                <md-input-container flex>
-                  <label>Diagnostico</label>
-                  <input ng-model="study.diagnostic"  name="diagnostic" required>
-                </md-input-container>
-                <div  layout="row" ng-show="internData">
+                <div  layout="row">
                     <md-input-container flex>
                       <label>Cama</label>
                       <input ng-model="study.internData.bed"  name="bed">
@@ -112,16 +110,15 @@
                 </div>
               </div>
               <div layout="row">
+                <md-input-container flex>
+                  <label>Diagnostico</label>
+                  <input ng-model="study.diagnostic"  name="diagnostic">
+                </md-input-container>
                 <md-input-container flex ng-if="isBioquimic">
                   <label>Muestras</label>
                   <input ng-model="study.shows"  name="shows">
                 </md-input-container>
-                <md-input-container flex>
-                  <label>Fecha</label>
-                  <input ng-model="study.creationDate"  name="creationDate" type="date" required>
-                </md-input-container>
               </div>
-
         </md-content>
         <md-content class="md-padding" id="analisis">
           <ul>
@@ -146,7 +143,7 @@
                          </li>
                      </ul>
               </li>
-          </ul-->
+          </ul>
         </md-content>
         <div layout="row">
           <md-button class="md-primary" ng-click="save()" ng-disabled="newStudyForm.$invalid" layout-align="end center">
@@ -156,8 +153,6 @@
           <md-button ng-click="cancel()">
             Cancelar
           </md-button>
-
-
         </div>
 </md-whiteframe>
 </form>

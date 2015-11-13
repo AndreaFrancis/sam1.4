@@ -1,7 +1,7 @@
 {
       "database": {
         "server"   : "127.0.0.1",
-        "database" : "BDEstadistica",
+        "database" : "BDVsh",
         "user"     : "sa",
         "password" : "2012Hp"
       }

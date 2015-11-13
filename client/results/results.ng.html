@@ -20,8 +20,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr class="md-table-content-row" ng-repeat="study in studies | orderBy: '-creationDate'" ng-click="show(study, $event)">
-
+                <tr class="md-table-content-row" dir-paginate="study in studies | orderBy: '-creationDate' | itemsPerPage: perPage" ng-click="show(study, $event)" total-items="studiesCount.count">
                     <td data-title="Labs">
                         <span  ng-repeat="c in study.labsObj">{{c.name}} - {{c.counter}} </span>
                     </td>
@@ -36,6 +35,20 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+         <div layout="row">
+            <md-input-container>
+                <label>Items</label>
+                <input ng-model="perPage">
+            </md-input-container>
+            <dir-pagination-controls on-page-change="pageChanged(newPageNumber)"></dir-pagination-controls>
+            <span></span>
+            <md-button class="md-icon" aria-label="Ver todo" ng-click="showAll()">
+                <i class="fa fa-eye"></i>
+            </md-button>
+            <md-button class="md-icon" ng-click="print()" aria-label="Imprimir">
+                      <i class="fa fa-print"></i>
+            </md-button>
         </div>
     </div>
 </div>

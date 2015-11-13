@@ -17,50 +17,32 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
         var userRol = localStorage.getItem("rolName");
         $scope.isBioquimic = userRol=="Bioquimico";
         $scope.isDoctor = userRol=="Doctor";
-        $scope.studies = $meteor.collection(Studies,false);
+        $scope.studies = Studies.find().fetch();
         if($stateParams.studyId){
           $scope.isExistingStudy = true;
-          //$scope.study = $meteor.object(Studies, $stateParams.studyId, false);
-
-          /*var doctor = $meteor.object(Doctors, $scope.study.doctor);
-
-          $scope.study.doctorObj = function(){
-            return doctor.lastName + " "+ doctor.name;
-          }*/
           var doc = $meteor.object(Studies, $stateParams.studyId, false);
 
-          //$scope.studies = $meteor.collection(function() {
-            //  return Studies.find({_id:$stateParams.studyId}, {
-              //    transform: function(doc) {
                       doc.patientObj = {};
                       if(doc.patient) {
-                          var patientObj = $meteor.collection(function(){
-                              return Patients.find({_id: {"$in": [doc.patient]}});
-                          });
-                          if(patientObj[0]) {
-                            doc.patientObj = patientObj[0];
+                          var patientObj = $meteor.object(Patients, doc.patient);
+                          if(patientObj) {
+                            doc.patientObj = patientObj;
                           }
                       }
 
-
-
                       doc.doctorObj = {};
                       if(!!doc.doctor){
-                        var doctorObj = $meteor.collection(function(){
-                            return Doctors.find({_id: {"$in": [doc.doctor]}});
-                        });
-                        if(doctorObj[0]) {
-                          doc.doctorObj = doctorObj[0];
+                        var doctorObj = $meteor.object(Doctors, doc.doctor);
+                        if(doctorObj) {
+                          doc.doctorObj = doctorObj;
                         }
                       }
 
                       doc.creatorName = {};
                       if(doc.creatorId) {
-                          var creatorName = $meteor.collection(function(){
-                              return Users.find({_id: {"$in": [doc.creatorId]}});
-                          });
-                          if(creatorName[0]) {
-                              doc.creatorName = creatorName[0].profile.name + " "+ creatorName[0].profile.lastName;
+                          var creatorName = $meteor.object(Users, doc.creatorId);
+                          if(creatorName) {
+                              doc.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
                           }
                       }
                       doc.serviceName = {};
@@ -77,12 +59,8 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                               doc.attentionName = attention.name;
                           }
                       }
-                      //return doc;
-                  //}
-              //});
-          //}, false);
+
           $scope.study = doc;
-          //$scope.study = $scope.studies[0];
 
           $scope.selectedAttention = $meteor.object(Attentions, $scope.study.attention);
           $scope.selectedService = $meteor.object(Services, $scope.study.service);
@@ -139,24 +117,9 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
         });
 
         }
-
-        //Extra data
-        //$scope.patient = $meteor.object(Patients, $scope.study.patient);
-        //$scope.creator = $meteor.object(Users, $scope.study.creatorId);
         $scope.bioquimic = {};
-        //$scope.isSecretary = localStorage.getItem("rol") == "Secretario";
-        //$scope.isBioquimic = localStorage.getItem("rol") == "Bioquimico";
-        //$scope.isDoctor = localStorage.getItem("rol") == "Doctor";
 
-
-        $scope.bioquimics = $meteor.collection(function(){
-            var bios = Users.find({"profile.mainRol": "Bioquimico"});
-            return bios;
-        });
-
-        /*var creatorName = $meteor.collection(function(){
-            return Users.find({roles: {"$in": ['Bioquimico']}});
-        });*/
+        $scope.bioquimics = Users.find({"profile.mainRol": "Bioquimico"}).fetch();
 
         $scope.saveStudy = function(event){
           delete $scope.study.patientObj;

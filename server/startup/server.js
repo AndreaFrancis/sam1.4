@@ -38,6 +38,17 @@ if(Meteor.isServer){
       Counts.publish(this,"analisys",Analisys.find({active:true}));
       Counts.publish(this,"titles",Titles.find({active:true}));
       Counts.publish(this,"exams",Exams.find({active:true}));
+      Counts.publish(this,"patients",Patients.find());
+      Counts.publish(this,"studies",Studies.find({$or:
+          [
+            { "dailyCode": { $exists: false } },
+            { "dailyCode": null }
+          ]}));
+      Counts.publish(this,"results",Studies.find({$and:
+          [
+            { "dailyCode": { $exists: true } },
+            { "dailyCode": {$ne:null} }
+          ]}));
     });
 
     Meteor.methods({
@@ -76,6 +87,50 @@ if(Meteor.isServer){
                       }
           });
           return fut.wait();
+        },
+        findPatientByPay : function(bill){
+          var fut = new Future();
+          var opts = {
+            sp : "obtenerPacientePorRecibo",
+            inputs : [ {
+              name  : "factura",
+              type  : Sql.driver.Int,
+              value : bill
+            }
+            ]
+          }
+
+          Sql.sp(opts, function(err, res){
+            if(err){
+                        console.log("ERRROR:"+ err);
+                        fut['return'](err);
+             }else{
+                        res.forEach(function(r){
+                              console.log("Es:"+r[0]['HCL_SEXO']+" "+r[0]['HCL_CODIGO']+" "+r[0]['HCL_APMAT']+" "+r[0]['HCL_NOMBRE']);
+                              var ci = r[0]['HCL_NUMCI'];
+                              var patient = Patients.findOne({ci:ci});
+                              if(patient == undefined || patient == null){
+                                console.log("No existe paciente con este ci, sera creado");
+                                var newPatient = 
+                                {
+                                  name:r[0]['HCL_NOMBRE'],
+                                  lastName : r[0]['HCL_APPAT'],
+                                  lastNameMother:r[0]['HCL_APMAT'],
+                                  medHis:r[0]['HCL_CODIGO'],
+                                  ci:r[0]['HCL_NUMCI']
+                                }
+                                Patients.insert(newPatient);
+                                newPatient = Patients.findOne({ci:ci});
+                                fut['return'](newPatient);
+                              }else{
+                                console.log("Paciente: "+patient.name);
+                                fut['return'](patient);
+                              }
+                        });
+                        console.log("SAM-INFO-Tamanio : "+res.length);
+            }
+          });
+          return fut.wait();
         }
     });
   
@@ -111,6 +166,6 @@ if(Meteor.isServer){
           console.log("La primera vez se creara el usuario administrador por defecto");
         }
       });
-      //Users.insert(user);
     }
+    //Meteor.call("findPatientByPay",418818);
 }

@@ -5,34 +5,33 @@
 <body  ng-app="sam-1" ng-controller="AppCtrl">
   <div class="container" ng-hide="$root.currentUser">
     <div layout="column" layout-align="center center">
-    <img src="igbj.gif" alt="I.G.B.J">  
-<md-whiteframe class="md-whiteframe-z1" layout layout-align="center center">
-  <form layout="column" name="loginForm" novalidate>
-    <div class="group">
-      <md-input-container>
-          <label>Nombre de usuario</label>
-          <input ng-model="username" required name="username">
-          <div ng-messages="loginForm.username.$error" ng-if="loginForm.username.$pristine">
-              <div ng-message="required">*Campo obligatorio</div>
-          </div>
-      </md-input-container>
+      <img src="igbj.gif" alt="I.G.B.J">  
+      <md-whiteframe class="md-whiteframe-z1" layout layout-align="center center">
+      <form layout="column" name="loginForm" novalidate>
+        <div class="group">
+          <md-input-container>
+            <label>Nombre de usuario</label>
+            <input ng-model="username" required name="username">
+            <div ng-messages="loginForm.username.$error" ng-if="loginForm.username.$pristine">
+                <div ng-message="required">*Campo obligatorio</div>
+            </div>
+          </md-input-container>
+        </div>
+        <div class="group">
+          <md-input-container>
+              <label>Password</label>
+              <input ng-model="password" required name="password" type="password">
+              <div ng-messages="loginForm.password.$error" ng-if="loginForm.password.$pristine">
+                <div ng-message="required">*Campo obligatorio</div>
+              </div>
+          </md-input-container>
+        </div>
+        <label class="error" error>{{error}}</label>
+        <md-button class="md-raised md-primary" ng-click="login()" ng-disabled="loginForm.$invalid">Acceder</md-button>
+      </form>
+      </md-whiteframe>
     </div>
-    <div class="group">
-      <md-input-container>
-          <label>Password</label>
-          <input ng-model="password" required name="password" type="password">
-          <div ng-messages="loginForm.password.$error" ng-if="loginForm.password.$pristine">
-              <div ng-message="required">*Campo obligatorio</div>
-          </div>
-      </md-input-container>
-    </div>
-    <label class="error" error>{{error}}</label>
-    <md-button class="md-raised md-primary" ng-click="login()" ng-disabled="loginForm.$invalid">Acceder</md-button>
-  </form>
-</md-whiteframe>
-</div>
   </div>
-
   <div id="wrapper" ng-show="$root.currentUser">
       <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0" ng-show="$root.currentUser">
           <div class="navbar-header">
@@ -51,7 +50,6 @@
                   </a>
                   <ul class="dropdown-menu dropdown-user">
                       <li ng-click="showPerfil()"><a href="#">
-                        <!--avatar ng-model="{{user}}"></avatar-->
                         <img ng-src="{{user.profile.image}}" class="md-avatar" alt="{{user.username}}" />
                 <index-text>{{username}}</index-text>
                       </a>
@@ -73,7 +71,6 @@
           </div>
       </nav>
   </div>
-
   <div id="page-wrapper" ng-show="$root.currentUser">
           <div ui-view class="center-content"></div>
   </div>

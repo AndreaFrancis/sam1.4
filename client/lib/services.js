@@ -275,21 +275,31 @@ angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
     }
     this.printPatientHistorial =  function(patient, studies){
       var newWin= window.open("");
-      newWin.document.write("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><style type='text/css'>table {width:100%} table, th, td {border: 1px solid black;}</style></head><body>");
-      newWin.document.write("<h2>Historial de paciente</h2>");
-      //Personal data
-      newWin.document.write("<b>Datos personales</b>");
-
+      var style = "<style type='text/css'>table {min-width:50%;  margin-left:auto; margin-right:auto;} table, th, td {border: 1px solid black;}"+
+                      "body {font-family: 'Verdana', Geneva, sans-serif;font-size:8pt}"+
+                      "header nav, footer {display: none;}"+
+                      "table {font-size:8pt; border-collapse:collapse}"+
+                      "h1 {text-align: center}"+
+                      ".header {text-align: right;}"+
+                      "@page {size:auto;margin: 10mm;}"+
+                      " .break { page-break-after: always; }"+
+                      " body {  }"+
+                      " tr {page-break-inside: avoid !important;} "+
+                      "</style>";
+      newWin.document.write("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>"+style+"</head><body>")
+      newWin.document.write("<b class='header'>COMPLEJO HOSPITALARIO VIEDMA</b><br/>");
+      newWin.document.write("<b class='header'>Instituto de Gastroenterología Boliviano Japonés</b><br/>");
+      newWin.document.write("<b class='header'>Cochabamba - Bolivia</b><br/>");
+      newWin.document.write("<h1>Historial de paciente</h1>");
+      newWin.document.write("<hr>");
       var textPersonalData = "";
-      textPersonalData+= "<b>Nombre</b>"+patient.lastName+" "+patient.lastNameMother+" "+patient.name+"</br>";
+      textPersonalData+= "<b>Nombre</b>"+patient.lastName+" "+TextEvaluatorService.getTextEvenIfNullOrUndef(patient.lastNameMother)+" "+patient.name+"</br>";
       textPersonalData+= "<b>Direccion</b>"+patient.address+"</br>";
       textPersonalData+= "<b>Telefono</b>"+patient.phone+"</br>";
       textPersonalData+= "<b>Edad</b>"+patient.age.value+" "+patient.age.in+"</br>";
       textPersonalData+= "<b>Genero</b>"+patient.gender+"</br>";
-
       newWin.document.write(textPersonalData);
-
-      //Studies data
+      newWin.document.write("<hr>");
       newWin.document.write("<b>Estudios</b>");
       newWin.document.write("<table>");
       var text = "<tr><th>Nro.</th><th>Cod.</th><th>Fecha</th><th>Diagnostico</th></tr>";
@@ -444,7 +454,7 @@ angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
       angular.forEach(patients, function(patient){
         text+="<tr>";
         text+="<td>"+counter+"</td>";
-        text+="<td>"+patient.lastName+"</td>";
+        text+="<td>"+patient.lastName+" "+TextEvaluatorService.getTextEvenIfNullOrUndef(patient.lastNameMother)+"</td>";
         text+="<td>"+patient.name+"</td>";
         text+="<td>"+patient.ci+"</td>";
         text+="</tr>";
