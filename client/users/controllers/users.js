@@ -3,9 +3,20 @@
  */
 angular.module("sam-1").controller("UsersListCtrl",['$scope','$meteor','notificationService','$mdDialog','ModalService','PrintService',
     function($scope, $meteor,notificationService,$mdDialog, ModalService,PrintService) {
-        $scope.users = $meteor.collection(function(){
-          return Users.find({},{
-            transform: function(doc){
+
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {username: 1};
+        $scope.headers = ['Img', 'Nombre de usuario','Nombre', 'Apellido', 'Rol', 'Acciones'];
+        
+        Meteor.subscribe('counters', function() {
+          $scope.usersCount = $meteor.object(Counts ,'users', false);
+        });
+
+        $scope.update = function(){
+          $scope.users = $meteor.collection(function(){
+            return Users.find({},{
+              transform: function(doc){
               if(doc.profile.mainRol){
                 var rol = $meteor.object(RolesData,doc.profile.mainRol);
                 if(rol){
@@ -13,23 +24,34 @@ angular.module("sam-1").controller("UsersListCtrl",['$scope','$meteor','notifica
                 }
               }
               return doc;
-            }
-          });
-        }, false);
+              },
+              limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
+            });
+          }, false);
+        }
 
         $scope.print = function(){
           PrintService.printUsers($scope.users);
         }
 
-        $scope.delete = function(user) {
-          Meteor.call("deleteUser", user._id, function(err) {
+        $scope.delete = function(user,$event) {
+           $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del usuario");
+          }
+          $scope.onRemoveConfirm = function() {
+            Meteor.call("deleteUser", user._id, function(err) {
               if(err) {
                   notificationService.showError("No se pudo eliminar el usuario");
                   console.log(err);
               }else{
                   notificationService.showSuccess("Se ha eliminado correctamente al usuario");
               }
-          });
+            });
+          }
+          ModalService.showConfirmDialog('Eliminar usuario', '¿Estas seguro de eliminar el usuario?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
 
         $scope.show = function(selectedUser, ev) {
@@ -38,10 +60,6 @@ angular.module("sam-1").controller("UsersListCtrl",['$scope','$meteor','notifica
 
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddUserController, 'client/users/views/addUser.tmpl.ng.html', ev, {user:null});
-        }
-
-        $scope.toggleSearch = function() {
-            $scope.showTextSearch = !$scope.showTextSearch;
         }
 
         $scope.search = function(){
@@ -73,20 +91,27 @@ angular.module("sam-1").controller("UsersListCtrl",['$scope','$meteor','notifica
         }, false);
         }
 
-        $scope.headers = ['Img', 'Nombre de usuario','Nombre', 'Apellido', 'Rol', 'Acciones'];
+        $scope.showAll = function(){
+          $scope.perPage = $scope.usersCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
 }]);
 
 function AddUserController($rootScope, $scope,$mdDialog, $meteor, user ,notificationService, ROLES) {
-    var imageUrl  = "../descarga.png";
+    $scope.isNewUser = true;
     if(user) {
       $scope.user = user;
-      var imageUrl  = $scope.user.profile.image;
-      $scope.imageStyle =     {'background': 'url("'+imageUrl+'"),background-repeat'};
+      $scope.isNewUser = false;
     }else {
       $scope.user = {};
       $scope.user.profile = {};
     }
-
     $scope.roles = $meteor.collection(RolesData, false);
 
     $scope.selectedRol = {};
@@ -103,7 +128,6 @@ function AddUserController($rootScope, $scope,$mdDialog, $meteor, user ,notifica
     }
 
     $scope.save = function(user) {
-      //Cleaning data from transform
         delete $scope.user.rol;
 
         if($scope.selectedFile) {
@@ -126,14 +150,25 @@ function AddUserController($rootScope, $scope,$mdDialog, $meteor, user ,notifica
           });
         }else{
           user.profile.mainRol  = $scope.selectedRol._id;
-          Meteor.call("createNewUser", user, function(err) {
+          if($scope.isNewUser){
+            Meteor.call("createNewUser", user, function(err) {
               if(err) {
                   notificationService.showError("Error en el registro del usuario");
                   console.log(err);
               }else{
                   notificationService.showSuccess("Se ha registrado correctamente al usuario"+ user._id);
               }
-          });
+            });  
+          }else{
+            Meteor.call("saveUser", user, function(err) {
+              if(err) {
+                  notificationService.showError("Error al guardar el usaurio");
+                  console.log(err);
+              }else{
+                  notificationService.showSuccess("Se ha guardado correctamente al usuario"+ user._id);
+              }
+            }); 
+          }
         }
 
         $scope.user = '';

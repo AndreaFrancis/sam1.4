@@ -1,28 +1,47 @@
 angular.module("sam-1").controller("MeasuresListCtrl",['$scope','$meteor','ModalService','notificationService','PrintService',
     function($scope, $meteor,ModalService,notificationService,PrintService) {
 
-        $scope.measures = $meteor.collection(Measures, false);
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {symbol: 1};
         $scope.headers = ['Simbolo', 'Nombre','Acciones'];
 
-        $scope.showTextSearch = true;
+        Meteor.subscribe('counters', function() {
+          $scope.measuresCount = $meteor.object(Counts ,'measures', false);
+        });
+
+        $scope.update = function(){
+          $scope.measures = $meteor.collection(function(){
+            return Measures.find({},{
+              limit: parseInt($scope.perPage),
+              skip: parseInt(($scope.page - 1) * $scope.perPage),
+              sort: $scope.sort
+            });
+          }, false);
+        }
+
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddMeasureController,  'client/measures/addMeasure.tmpl.ng.html',ev, {measure:null});
-        }
-        $scope.toggleSearch = function() {
-            $scope.showTextSearch = !$scope.showTextSearch;
         }
 
         $scope.print = function(){
           PrintService.printMeasures($scope.measures);
         }
 
-        $scope.delete = function(measure) {
-          $scope.measures.remove(measure).then(function(number) {
+        $scope.delete = function(measure,$event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion de la u.m");
+          }
+          $scope.onRemoveConfirm = function() {
+            $scope.measures.remove(measure).then(function(number) {
               notificationService.showSuccess("Se ha eliminado correctamente la unidad de medida");
-          }, function(error){
+            }, function(error){
               notificationService.showError("Error en la eliminacino de la unidad de medida");
               console.log(error);
-          });
+            });
+          }
+          ModalService.showConfirmDialog('Eliminar rol', '¿Estas seguro de eliminar el rol?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
 
         $scope.show = function(selectedMeasure, ev) {
@@ -44,6 +63,16 @@ angular.module("sam-1").controller("MeasuresListCtrl",['$scope','$meteor','Modal
         }, false);
         }
 
+        $scope.showAll = function(){
+          $scope.perPage = $scope.measuresCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 function AddMeasureController($scope,$mdDialog, $meteor, measure ,notificationService) {

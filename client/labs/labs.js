@@ -17,6 +17,7 @@ angular.module("sam-1").controller("LabsListCtrl",['$scope','$meteor','ModalServ
                                     sort: $scope.sort});
           }, false);
         }
+
         $scope.showAddNew = function(ev) {
             ModalService.showModalWithParams(AddLabController,  'client/labs/addLab.tmpl.ng.html',ev, {lab:null});
         }
@@ -25,13 +26,20 @@ angular.module("sam-1").controller("LabsListCtrl",['$scope','$meteor','ModalServ
           PrintService.printLabs($scope.labs);
         }
 
-        $scope.delete = function(lab) {
-          $scope.labs.remove(lab).then(function(number) {
+        $scope.delete = function(lab,$event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del laboratorio");
+          }
+          $scope.onRemoveConfirm = function() {
+            $scope.labs.remove(lab).then(function(number) {
               notificationService.showSuccess("Se ha eliminado correctamente el laboratorio");
-          }, function(error){
+            }, function(error){
               notificationService.showError("Error en la eliminacino del laboratorio");
               console.log(error);
-          });
+            });
+          }
+          ModalService.showConfirmDialog('Eliminar laboratorio', '¿Estas seguro de eliminar el laboratorio?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
 
         $scope.show = function(selectedLab, ev) {

@@ -29,8 +29,19 @@ if(Meteor.isServer){
       Counts.publish(this,"roles",RolesData.find());
       Counts.publish(this,"modules",Modules.find());
       Counts.publish(this,"labs",Labs.find());
+      Counts.publish(this,"users",Users.find());
+      Counts.publish(this,"measures",Measures.find());
+      Counts.publish(this,"labpers",Labpersonal.find());
     });
+
     Meteor.methods({
+        saveUser: function(user){
+          Meteor.users.update({_id:user._id}, 
+            { $set:{"profile.name":user.profile.name,
+            "profile.lastName":user.profile.lastName,
+            "profile.lastNameMother":user.profile.lastNameMother,
+            "profile.mainrol":user.profile.mainrol}} );
+        },
         createNewUser: function(user){
             if (!user.username){
               throw new Meteor.Error(422, 'Please include a username.');

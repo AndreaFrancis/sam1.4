@@ -33,7 +33,7 @@ angular.module("sam-1").controller("RolesListCtrl",['$scope','$meteor','notifica
         $scope.delete = function(rol,$event, roles) {
 
           $scope.onRemoveCancel = function() {
-              console.log("Se cancelo la eliminacion del usuario");
+              console.log("Se cancelo la eliminacion del rol");
           }
           $scope.onRemoveConfirm = function() {
             if(roles!=undefined){
