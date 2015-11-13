@@ -20,7 +20,8 @@
                 <md-select placeholder="Unidad de medida" ng-model="exam.measure" flex>
                     <md-option ng-repeat="measure in measures" value="{{measure._id}}">{{measure.symbol}}</md-option>
                 </md-select>
-                <md-autocomplete flex required
+            </div>
+            <md-autocomplete flex required
                 md-selected-item-change="null"
                   md-search-text-change="null"
                 name="autocompleteField"
@@ -28,7 +29,7 @@
                 md-selected-item="selectedTitle"
                 md-search-text="searchText"
                 md-items="item in querySearch(searchText)"
-                md-item-text="item.value"
+                md-item-text="item.name"
                 md-floating-label="Titulo">
                   <md-item-template>
                     <span md-highlight-text="searchText">{{item.value}}</span>
@@ -37,12 +38,10 @@
                     <div ng-message="required"><b>Debe</b> escoger un titulo</div>
                   </div>
               </md-autocomplete>
-            </div>
-            <md-divider></md-divider>
-            <div layout="row">
-              <div layout="column" flex>
+          <div layout="row">
+            <div layout="column" flex>
                   <md-input-container>
-                    <label>Nombre del rango</label>
+                    <label>Rango</label>
                     <input ng-model="newRange.name" required name="newRangeName" input-text>
                     <div ng-messages="newExamForm.newRangeName.$error" ng-if="newExamForm.newRangeName.$dirty">
                         <div ng-message="required">*Campo obligatorio</div>
@@ -59,8 +58,9 @@
                   <md-button class="md-primary" ng-click="saveRange()" ng-disabled="newExamForm.newRangeName.$invalid">
                     &ensp;Agregar&ensp;&ensp;<span class="ion-chevron-right"></span>
                   </md-button>
-              </div>
+              </div>   
               <md-list flex style="padding:20px;">
+                <md-subheader class="md-no-sticky">Lista de rangos</md-subheader>    
                     <md-list-item ng-repeat="range in exam.ranges" class="md-3-line">
                       <div class="md-list-item-text">
                           <h3>{{range.name|truncate:15}}</h3>
@@ -70,7 +70,7 @@
                         <i class="md-secondary fa fa-trash" ng-click="deleteRange($index)" aria-label="Chat"></i>
                     </md-list-item>
               </md-list>
-            </div>
+          </div>
           </div>
         </md-dialog-content>
         <div class="md-actions" layout="row">

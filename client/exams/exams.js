@@ -1,13 +1,20 @@
 /**
  * Created by Andrea on 26/07/2015.
  */
-angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalService','PrintService',
-    function($scope, $meteor, ModalService,PrintService) {
+angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalService','PrintService','notificationService',
+    function($scope, $meteor, ModalService,PrintService, notificationService) {
+        $scope.page = 1;
+        $scope.perPage = 3;
+        $scope.sort = {name: 1};
         $scope.headers = ["Nombre","Medida","Titulo", "Rangos", "Acciones"];
         $scope.titles = $meteor.collection(Exams, false);
 
-        $scope.exams = $meteor.collection(function() {
-            return Exams.find({active:true}, {
+        Meteor.subscribe('counters', function() {
+          $scope.examsCount = $meteor.object(Counts ,'exams', false);
+        });
+
+        $scope.update = function(){
+          $scope.exams = Exams.find({active:true}, {
                 transform: function(doc) {
                     doc.measureSymbol = '';
                     if(doc.measure) {
@@ -19,13 +26,16 @@ angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalSer
                     if(doc.title) {
                         var title = $meteor.object(Titles,doc.title);
                         if(title){
-                          doc.titleName = title.name;
+                          doc.titleName = title;
                         }
                     }
                     return doc;
-                }
-            });
-        }, false);
+                },
+                limit: parseInt($scope.perPage),
+                skip: parseInt(($scope.page - 1) * $scope.perPage),
+                sort: $scope.sort
+            }).fetch();
+        }
 
         $scope.print = function(){
           PrintService.printExams($scope.exams);
@@ -34,18 +44,25 @@ angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalSer
             ModalService.showModalWithParams(AddExamCtrl, 'client/exams/addExam.tmpl.ng.html', ev,{exam:null});
         }
 
-        $scope.delete = function(exam) {
-          Exams.update(exam._id, {
-            $set: {active: false}
-          });
+        $scope.delete = function(exam, $event) {
+          $scope.onRemoveCancel = function() {
+              console.log("Se cancelo la eliminacion del rol");
+          }
+          $scope.onRemoveConfirm = function() {
+            Exams.update(exam._id, {
+              $set: {active: false}
+            });
+            notificationService.showSuccess("Se ha eliminado correctamente el examen");
+          }
+          ModalService.showConfirmDialog('Eliminar examen', '¿Estas seguro de eliminar el examen?', 'Eliminar', 'Cancelar', $event, $scope.onRemoveCancel, $scope.onRemoveConfirm);
+          $event.stopPropagation();
         }
         $scope.show = function(selectedExam, ev) {
             ModalService.showModalWithParams(AddExamCtrl, 'client/exams/addExam.tmpl.ng.html', ev,{exam:selectedExam});
         }
 
         $scope.search = function(){
-          $scope.exams = $meteor.collection(function() {
-            return Exams.find({$and:[{active:true}, {name : { $regex : '.*' + $scope.searchText || '' + '.*', '$options' : 'i' }}]}, {
+          $scope.exams = Exams.find({$and:[{active:true}, {name : { $regex : '.*' + $scope.searchText || '' + '.*', '$options' : 'i' }}]}, {
                 transform: function(doc) {
                     doc.measureSymbol = '';
                     if(doc.measure) {
@@ -57,19 +74,30 @@ angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalSer
                     if(doc.title) {
                         var title = $meteor.object(Titles,doc.title);
                         if(title){
-                          doc.titleName = title.name;
+                          doc.titleName = title;
                         }
                     }
                     return doc;
                 }
-            });
-        }, false);
+            }).fetch();
         }
+
+        $scope.showAll = function(){
+          $scope.perPage = $scope.examsCount.count;
+        }
+        
+        $scope.pageChanged = function(newPage) {
+          $scope.page = newPage;
+          $scope.update();
+        };
+
+        $scope.update();
     }]);
 
 function AddExamCtrl($scope, $meteor, notificationService, exam,$mdDialog) {
     if(exam){
       $scope.exam = exam;
+      $scope.selectedTitle = $meteor.object(Titles, $scope.exam.title);
     }else{
       $scope.exam = {};
       $scope.exam.ranges = [];
@@ -133,7 +161,7 @@ function AddExamCtrl($scope, $meteor, notificationService, exam,$mdDialog) {
     }
 
     $scope.save = function() {
-      //Cleaning data from transform
+      
         delete $scope.exam.measureSymbol;
         delete $scope.exam.titleName;
 
