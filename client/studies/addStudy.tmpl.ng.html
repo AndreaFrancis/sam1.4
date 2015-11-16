@@ -4,16 +4,14 @@
   <md-whiteframe class="md-whiteframe-z1" layout="column">
         <md-content class="md-padding" id="general">
           <div layout="row">
-            <md-input-container flex ng-if="isBioquimic">
+            <md-input-container flex>
               <label>Nro. Factura</label>
-              <input ng-model="study.bill"  name="bill" input-numeric>
+              <input ng-model="study.bill"  name="bill" input-numeric ng-keyup="$event.keyCode == 13 && searchBill($event)">
               <div ng-messages="newStudyForm.bill.$error" ng-if="newStudyForm.bill.$dirty">
                       <div ng-message="inputNumeric">*Ingrese solo numeros</div>
               </div>
             </md-input-container>
-            <md-button class="md-icon-button" flex  aria-label="Buscar" ng-click="searchBill($event)">
-                            <i class="fa fa-plus"></i>
-            </md-button>
+            <md-progress-circular  md-diameter="20" md-mode="{{waiting}}"></md-progress-circular>
             <md-input-container flex ng-if="isBioquimic">
               <label>Codigo</label>
               <input ng-model="study.dailyCode"  name="dailyCode" daily-study date="{{study.creationDate.toString()}}"  code="{{study.dailyCode}}">
@@ -23,7 +21,7 @@
             </md-input-container>
             <md-input-container flex>
                   <label>Fecha</label>
-                  <input ng-model="study.creationDate"  name="creationDate" type="date">
+                  <input ng-model="creationDate"  name="creationDate" type="date">
             </md-input-container>
           </div>
           <div layout="row">
@@ -38,18 +36,18 @@
                               md-search-text="searchText"
                               md-selected-item-change="selectedItemChange(item)"
                               md-items="item in querySearch(searchText)"
-                              md-item-text="item.name"
+                              md-item-text="item.fullName"
                               md-min-length="0"
                               placeholder="Paciente"
                               md-floating-label="Paciente"
                               md-menu-class="autocomplete-custom-template">
                           <md-item-template>
                           <span class="item-title">
-                              <span> {{item.value}}</span>
+                              <span> {{item.fullName}}</span>
                           </span>
                           <span class="item-metadata">
                               <span class="item-metastat">
-                                  <strong>{{item.ci}}</strong>
+                                  <strong>{{item.value}}</strong>
                               </span>
                           </span>
                           </md-item-template>
@@ -85,7 +83,7 @@
                             </span>
                             </md-item-template>
                         </md-autocomplete>
-                        <md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewDoctor($event)">
+                        <md-button type="button" class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewDoctor($event)">
                             <i class="fa fa-plus"></i>
                         </md-button>
                       </div>
@@ -146,11 +144,11 @@
           </ul>
         </md-content>
         <div layout="row">
-          <md-button class="md-primary" ng-click="save()" ng-disabled="newStudyForm.$invalid" layout-align="end center">
+          <md-button type="button" class="md-primary" ng-click="save()" ng-disabled="newStudyForm.$invalid" layout-align="end center">
               Guardar
             </md-button>
           <span flex></span>
-          <md-button ng-click="cancel()">
+          <md-button type="button"  ng-click="cancel()">
             Cancelar
           </md-button>
         </div>

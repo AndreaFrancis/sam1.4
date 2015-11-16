@@ -21,11 +21,12 @@
                   <md-button class="md-fab" aria-label="Generar" ng-click="createDateReport(pInitialDate,pEndDate)">
                       <i class="fa fa-search"></i>
                   </md-button>
-                  <md-button class="md-fab md-primary" ng-click="printDiv('reports')" aria-label="Print">
+                  <md-button class="md-fab md-primary" ng-click="printReport()" aria-label="Print">
                             <i class="fa fa-print"></i>
                   </md-button>
           </div>
           <div class="sub-content">
+                      <b>Nro. resultados: </b>{{nroResults}}<br/>
                       <div class="table-responsive-vertical shadow-z-1 center-table">
                           <table id="table" class="table table-hover table-mc-light-blue">
                               <thead>
@@ -45,15 +46,23 @@
                                   <th  class="md-table-header">
                                     Doctor
                                   </th>
+                                  <th  class="md-table-header">
+                                    Atencion
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Servicio
+                                  </th>
                               </tr>
                               </thead>
                               <tbody>
-                              <tr ng-repeat="res in results" class="md-table-content-row">
-                                  <td data-title="Fecha">{{ res.dailyCode }}</td>
+                              <tr ng-repeat="res in results| orderBy: 'creationDate'" class="md-table-content-row">
+                                  <td data-title="Codigo">{{ res.dailyCode }}</td>
                                   <td data-title="Fecha">{{ res.creationDate.toLocaleDateString() }}</td>
                                   <td data-title="Paciente">{{ res.patientName }}</td>
                                   <td data-title="Edad">{{ res.age.value }} {{ res.age.in }}</td>
                                   <td data-title="Doctor">{{ res.doctorName }}</td>
+                                  <td data-title="Atencion">{{ res.attentionName }}</td>
+                                  <td data-title="Servicio">{{ res.serviceName }}</td>
                               </tr>
                               </tbody>
                           </table>
@@ -74,21 +83,23 @@
                       </md-input-container>
 
                       <md-select placeholder="Atencion" ng-model="selectedAttention">
-                          <md-option ng-repeat="attention in attentions" ng-value="attention._id">{{attention.name}}</md-option>
+                          <md-option ng-value="selectors.ALL">{{selectors.ALL}}</md-option>
+                          <md-option ng-repeat="attention in attentions" ng-value="attention">{{attention.name}}</md-option>
                       </md-select>
 
                       <md-select placeholder="Servicio" ng-model="selectedService">
-                          <md-option ng-repeat="service in services" ng-value="service._id">{{service.name}}</md-option>
+                          <md-option ng-value="selectors.ALL">{{selectors.ALL}}</md-option>
+                          <md-option ng-repeat="service in services" ng-value="service">{{service.name}}</md-option>
                       </md-select>
                       <md-button class="md-fab" aria-label="Generar"  ng-click="createProcedenceReport(pInitialDate,pEndDate,selectedAttention,selectedService)">
                           <i class="fa fa-search"></i>
                       </md-button>
-                      <md-button class="md-fab md-primary" ng-click="printDiv('procedence')" aria-label="Print">
+                      <md-button class="md-fab md-primary" ng-click="printReportByProcedence()" aria-label="Print">
                                 <i class="fa fa-print"></i>
                       </md-button>
           </div>
-
           <div class="sub-content">
+                      <b>Nro. resultados: </b>{{nroResults}}<br/>
                       <div class="table-responsive-vertical shadow-z-1 center-table">
 
                           <table id="table" class="table table-hover table-mc-light-blue">
@@ -109,6 +120,12 @@
                                   <th  class="md-table-header">
                                     Doctor
                                   </th>
+                                  <th  class="md-table-header">
+                                    Atencion
+                                  </th>
+                                  <th  class="md-table-header">
+                                    Servicio
+                                  </th>
                               </tr>
                               </thead>
                               <tbody>
@@ -118,6 +135,8 @@
                                   <td data-title="Paciente">{{ res.patientName }}</td>
                                   <td data-title="Edad">{{ res.age.value }} {{ res.age.in }}</td>
                                   <td data-title="Doctor">{{ res.doctorName }}</td>
+                                  <td data-title="Atencion">{{ res.attentionName }}</td>
+                                  <td data-title="Servicio">{{ res.serviceName }}</td>
                               </tr>
                               </tbody>
                           </table>
@@ -136,31 +155,33 @@
                     <label>Hasta</label>
                     <input ng-model="pEndDate"  type="date">
                   </md-input-container>
+                  <md-radio-group ng-model="gender" layout="row">
+                    <md-radio-button value="F" >F</md-radio-button>
+                    <md-radio-button value="M" class="md-primary">M</md-radio-button>
+                  </md-radio-group>
                   <md-button class="md-fab" aria-label="Generar" ng-click="createPatientReport(pInitialDate,pEndDate, gender,pInitialAge,pEndAge,selectedInType)">
                       <i class="fa fa-search"></i>
                   </md-button>
-                  <md-button class="md-fab md-primary" ng-click="printDiv('gender')" aria-label="Print">
+                  <md-button class="md-fab md-primary" ng-click="printReportByPatient()" aria-label="Print">
                             <i class="fa fa-print"></i>
                   </md-button>
           </div>
           <div layout='row'>
-            <md-radio-group ng-model="gender" layout="column">
-                <md-radio-button value="F" >F</md-radio-button>
-                <md-radio-button value="M" class="md-primary">M</md-radio-button>
-            </md-radio-group>
             <md-input-container flex>
                   <label>Inicial</label>
-                  <input ng-model="pInitialAge"  type="text">
-                </md-input-container>
-                <md-input-container flex>
+                  <input ng-model="pInitialAge"  type="text" input-numeric>
+            </md-input-container>
+            <md-input-container flex>
                   <label>Final</label>
-                  <input ng-model="pEndAge"  type="text">
-                </md-input-container>
-                <md-select placeholder="En" ng-model="selectedInType">
+                  <input ng-model="pEndAge"  type="text" input-numeric>
+            </md-input-container>
+            <md-select placeholder="En" ng-model="selectedInType">
                     <md-option ng-repeat="i in inTypes" value="{{i}}">{{i}}</md-option>
-                </md-select>
+            </md-select>
           </div>
           <div class="sub-content">
+                      <b>Nro. pacientes: </b>{{nroResultsPatient}}<br/>
+                      <b>Nro. resultados: </b>{{nroResults}}<br/>
                       <div class="table-responsive-vertical shadow-z-1 center-table">
                           <table id="table" class="table table-hover table-mc-light-blue">
                               <thead>
@@ -209,17 +230,18 @@
                       </md-input-container>
 
                       <md-select placeholder="Analisis" ng-model="selectedAnalisys">
-                          <md-option ng-repeat="an in analisys" ng-value="an._id">{{an.name}}</md-option>
+                          <md-option ng-repeat="an in analisys" ng-value="an">{{an.name}}</md-option>
                       </md-select>
                       <md-button class="md-fab" aria-label="Generar"  ng-click="createAnalisysReport(pInitialDate,pEndDate,selectedAnalisys)">
                           <i class="fa fa-search"></i>
                       </md-button>
-                      <md-button class="md-fab md-primary"  ng-click="printDiv('analisys')" aria-label="Print">
+                      <md-button class="md-fab md-primary"  ng-click="printReportByAnalisys(pInitialDate,pEndDate,selectedAnalisys)" aria-label="Print">
                                 <i class="fa fa-print"></i>
                       </md-button>
           </div>
 
           <div class="sub-content">
+                      <b>Nro. resultados: </b>{{nroResults}}<br/>
                       <div class="table-responsive-vertical shadow-z-1 center-table">
                           <table id="table" class="table table-hover table-mc-light-blue">
                               <thead>
@@ -265,7 +287,12 @@
             <md-input-container flex>
                 <label>Hasta</label>
                 <input ng-model="pEndDate"  type="date">
-              </md-input-container>
+            </md-input-container>
+            <md-radio-group ng-model="statisticType" layout="row" ng-change="changeStatisticType(statisticType)">
+                    <md-radio-button value="0">Discriminado</md-radio-button>
+                    <md-radio-button value="1" class="md-primary">General</md-radio-button>
+            </md-radio-group>
+
               <md-button class="md-fab" aria-label="Generar" ng-click="createDiscriminated(pInitialDate,pEndDate)">
                 <i class="fa fa-search"></i>
               </md-button>
@@ -282,10 +309,11 @@
                                 <th> Analisis</th>
                                 <th ng-repeat="at in attentions" align="center">
 
-                                  <table>
+                                  <table class="table table-hover table-mc-light-blue">
                                     <tr>
                                           <th ng-repeat="ser in services">
-                                            {{at.name}} - {{ser.name}}
+                                            {{at.name|limitTo:3}} - {{ser.name|limitTo:3}}
+                                            <span>  </span>
                                           </th>
                                     </tr>
                                   </table>
@@ -298,16 +326,16 @@
                                   <b><u>{{analisysId.name}}</u></b>
                                 </td>
                                 <td ng-repeat="at in attentions">
-                                  <table>
-                                    <tr>
+                                  <table class="table table-hover table-mc-light-blue">
+                                    <tr class="analisysHeader">
                                       <td ng-repeat="ser in services">
-                                        -{{template[id].result[at._id][ser._id]}}-
+                                        {{template[id].result[at._id][ser._id]}}
                                       </td>
                                     </tr>
                                   </table>
                                 </td>
                               </tr>
-                              <tr ng-repeat-end ng-repeat="(idTitle,title) in analisysId.titles">
+                              <tr ng-repeat-end ng-repeat="(idTitle,title) in analisysId.titles" ng-if="completeStatistics">
                                 <td>
                                   <b>{{title.name}}</b><br/>
                                   <ul>
@@ -317,7 +345,7 @@
                                   </ul>
                                 </td>
                                 <td ng-repeat="at in attentions">
-                                  <table>
+                                  <table class="table table-hover table-mc-light-blue">
                                     <tr>
                                       <td ng-repeat="ser in services">
                                         .......................<br>

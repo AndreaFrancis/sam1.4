@@ -2,6 +2,10 @@ angular.module('sam-1').constant("CONDITIONS", {
         "INTERN_PATIENT": "Internado"
 });
 
+angular.module('sam-1').constant("SELECTORS", {
+        "ALL": "Todos"
+});
+
 angular.module('sam-1').constant("ROLES", {
         0: "Administrador",
         1: "Doctor",

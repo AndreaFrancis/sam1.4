@@ -31,6 +31,7 @@
                     <td data-title="Apellidos">{{ patient.lastName }} {{ patient.lastNameMother }}</td>
                     <td data-title="Nombre">{{ patient.name }}</td>
                     <td data-title="Ci">{{ patient.ci }}</td>
+                    <td data-title="Edad">{{ patient.age.value }} {{ patient.age.in }}</td>
                     <td data-title="Acciones" class="md-secondary">
                       <md-button class="md-icon-button" flex  aria-label="Detalles" ng-click="delete(patient, $event)">
                           <i class="fa fa-trash"></i>

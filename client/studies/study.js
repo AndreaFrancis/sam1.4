@@ -17,56 +17,55 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
         var userRol = localStorage.getItem("rolName");
         $scope.isBioquimic = userRol=="Bioquimico";
         $scope.isDoctor = userRol=="Doctor";
-        $scope.studies = Studies.find().fetch();
-        if($stateParams.studyId){
-          $scope.isExistingStudy = true;
-          var doc = $meteor.object(Studies, $stateParams.studyId, false);
-
-                      doc.patientObj = {};
-                      if(doc.patient) {
-                          var patientObj = $meteor.object(Patients, doc.patient);
+        var refreshStudy = function(){
+          $scope.study.patientObj = {};
+          if($scope.study.patient) {
+                          var patientObj = $meteor.object(Patients, $scope.study.patient);
                           if(patientObj) {
-                            doc.patientObj = patientObj;
+                            $scope.study.patientObj = patientObj;
                           }
-                      }
+          }
 
-                      doc.doctorObj = {};
-                      if(!!doc.doctor){
-                        var doctorObj = $meteor.object(Doctors, doc.doctor);
+          $scope.study.doctorObj = {};
+                      if(!!$scope.study.doctor){
+                        var doctorObj = $meteor.object(Doctors, $scope.study.doctor);
                         if(doctorObj) {
-                          doc.doctorObj = doctorObj;
+                          $scope.study.doctorObj = doctorObj;
                         }
                       }
 
-                      doc.creatorName = {};
-                      if(doc.creatorId) {
-                          var creatorName = $meteor.object(Users, doc.creatorId);
+                      $scope.study.creatorName = {};
+                      if($scope.study.creatorId) {
+                          var creatorName = $meteor.object(Users, $scope.study.creatorId);
                           if(creatorName) {
-                              doc.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
+                              $scope.study.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
                           }
                       }
-                      doc.serviceName = {};
-                      if(doc.service) {
-                          var service = $meteor.object(Services, doc.service);
+                      $scope.study.serviceName = {};
+                      if($scope.study.service) {
+                          var service = $meteor.object(Services, $scope.study.service);
                           if(service) {
-                              doc.serviceName = service.name;
+                              $scope.study.serviceName = service.name;
                           }
                       }
-                      doc.attentionName = {};
-                      if(doc.attention) {
-                          var attention = $meteor.object(Attentions, doc.attention);
+                      $scope.study.attentionName = {};
+                      if($scope.study.attention) {
+                          var attention = $meteor.object(Attentions, $scope.study.attention);
                           if(attention) {
-                              doc.attentionName = attention.name;
+                              $scope.study.attentionName = attention.name;
                           }
                       }
-
-          $scope.study = doc;
-
+        }
+        if($stateParams.studyId){
+          $scope.isExistingStudy = true;
+          $scope.study = $scope.$meteorObject(Studies, $stateParams.studyId, false);
+          refreshStudy();          
           $scope.selectedAttention = $meteor.object(Attentions, $scope.study.attention);
           $scope.selectedService = $meteor.object(Services, $scope.study.service);
-
+          $scope.analisysList = $scope.study.analisys;
           //Fill analisis, titles, exams
-          angular.forEach($scope.study.analisys, function(analisys){
+          //angular.forEach($scope.study.analisys, function(analisys){
+          angular.forEach($scope.analisysList, function(analisys){
             var analisysName = $meteor.object(Analisys, analisys.analisys);
             analisys.lab = function(){
               return analisysName.lab;
@@ -117,9 +116,10 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
         });
 
         }
-        $scope.bioquimic = {};
+        
+        //$scope.bioquimic = {};
 
-        $scope.bioquimics = Users.find({"profile.mainRol": "Bioquimico"}).fetch();
+        //$scope.bioquimics = Users.find({"profile.mainRol": "Bioquimico"}).fetch();
 
         $scope.saveStudy = function(event){
           delete $scope.study.patientObj;
@@ -128,23 +128,21 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           delete $scope.study.serviceName;
           delete $scope.study.attentionName;
           delete $scope.study._serverBackup;
-
-          $scope.studies.save($scope.study).then(function(number) {
-              notificationService.showSuccess("Se ha guardado correctamente el estudio");
-          }, function(error){
-              notificationService.showError("Error en el registro del estudio");
-              console.log(error);
+          $scope.study.save()
+          .then(function(number) {
+          refreshStudy();
+          notificationService.showSuccess("Se ha guardado correctamente el estudio");
+          },function(error){
+            notificationService.showError("Error en el registro del estudio");
+            console.log(error);
           });
         }
         $scope.showHistorial = function(exam, ev){
-          ModalService.showModalWithParams(HistorialController,  'client/studies/historial.tmpl.ng.html',ev, {exam:exam});
+          ModalService.showModalWithParams(HistorialController,  'client/studies/historial.tmpl.ng.html',ev, {exam:exam,study:$scope.study});
         }
 
         $scope.goStudies = function(){
             $state.go('studies');
-        }
-
-        $scope.evaluateRange = function(exam){
         }
 
         $scope.save = function(exam) {
@@ -177,8 +175,14 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           partialRecord.user = userAsigned;
           partialRecord.date = new Date();
           exam.historial.push(partialRecord);
-          $scope.studies.save($scope.study);
+          $scope.study.save()
+          .then(function(number) {
+          refreshStudy();
           notificationService.showSuccess("Se ha guardado correctamente el resultado");
+          },function(error){
+            notificationService.showError("Error en el registro el resultado");
+            console.log(error);
+          });
         }
 
 
@@ -295,7 +299,7 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
             newWin.document.write("<b>Numero de recibo: </b>"+$scope.study.bill||""+"<br>");
           }
           newWin.document.write("<hr>");
-          angular.forEach($scope.study.analisys, function(analisys){
+          angular.forEach($scope.analisysList, function(analisys){
               newWin.document.write("<h3>"+analisys.name()+"</h3>");
               angular.forEach(analisys.titles, function(title){
                 newWin.document.write("<b>"+title.name()+"<b><br/>");
@@ -312,7 +316,6 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                     }else{
                       newWin.document.write("<td></td>");
                     }
-
                     //Reference
                     if(exam.ranges()){
                       newWin.document.write("<td>");
@@ -323,12 +326,10 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                           });
                           newWin.document.write("<p>"+rangeText+"</p>");
                         });
-
                       newWin.document.write("</td>");
                     }
                     //Details
                     newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.detail)+"</td>");
-
                     newWin.document.write("</tr>");
                   });
                 newWin.document.write("</table>");
@@ -339,37 +340,13 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           newWin.print();
           newWin.close();
         }
-
-        // methods
-
-        $scope.calculateAge = function getAge(date) {
-          var dateString = date.toString();
-          var birthdate = new Date(dateString).getTime();
-          var now = new Date().getTime();
-          var n = (now - birthdate)/1000;
-          if (n < 604800) { // less than a week
-            var day_n = Math.floor(n/86400);
-            return day_n + ' dia' + (day_n > 1 ? 's' : '');
-          } else if (n < 2629743) {  // less than a month
-            var week_n = Math.floor(n/604800);
-            return week_n + ' semana' + (week_n > 1 ? 's' : '');
-          } else if (n < 63113852) { // less than 24 months
-            var month_n = Math.floor(n/2629743);
-            return month_n + ' mes' + (month_n > 1 ? 'es' : '');
-          } else {
-            var year_n = Math.floor(n/31556926);
-            return year_n + ' año' + (year_n > 1 ? 's' : '');
-          }
-        }
-
-
-
     }]);
 
 
-function HistorialController($scope,$mdDialog, exam, $meteor, DateService) {
+function HistorialController($scope,$mdDialog, exam,study, $meteor, DateService, PrintService) {
         if(exam) {
           $scope.exam = exam;
+          $scope.study = study;
         }
         $scope.dateService = DateService;
         angular.forEach($scope.exam.historial, function(modification){
@@ -379,5 +356,8 @@ function HistorialController($scope,$mdDialog, exam, $meteor, DateService) {
 
         $scope.cancel = function() {
             $mdDialog.cancel();
+        }
+        $scope.print = function(){
+            PrintService.printHistorialOfExam($scope.exam, $scope.study);
         }
 }

@@ -129,7 +129,7 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
     $scope.isBioquimic = userRol=="Bioquimico";
     $scope.isDoctor = userRol=="Doctor";
     $scope.newDoctor = {};
-    $scope.study.creationDate = new Date();
+    $scope.creationDate = new Date();
     $scope.labs = $meteor.collection(Labs,false);
     $scope.labsCounter = [];
     angular.forEach($scope.labs, function(lab){
@@ -151,7 +151,7 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
         $scope.study.internData = {};
         $scope.patients = Patients.find({}, {
                 transform: function(doc) {
-                    doc.value = (doc.lastName||"")+ " "+ (doc.lastNameMother||"") + " "+doc.name;
+                    doc.fullName = (doc.lastName||"")+ " "+ (doc.lastNameMother||"") + " "+doc.name;
                     return doc;
                 }
             }).fetch();
@@ -181,19 +181,31 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
 
 
     $scope.searchBill = function($event){
+      $scope.waiting = true;
       Meteor.call("findPatientByPay", $scope.study.bill, function(err,res) {
               if(err) {
                   notificationService.showError("No se encontro la factura");
                   console.log(err);
+                  $scope.waiting = false;
               }else{
+                  res.fullName = (res.lastName||"")+ " "+ (res.lastNameMother||"") + " "+res.name;
                   $scope.selectedItem = res;
+                  $scope.waiting = false;
                   $scope.$apply();
               }
       });
       $event.stopPropagation();
     }
     $scope.createNewDoctor = function(ev){
-      ModalService.showModalWithParams('AddDoctorController',  'client/doctors/addDoctor.tmpl.ng.html',ev, {doctor:null});
+      var refreshDoctors = function(){
+        $scope.doctors = Doctors.find({},{
+        transform: function(doc){
+          doc.value = doc.name +" "+ doc.lastName;
+          return doc;
+        }
+        }).fetch();
+      }
+      ModalService.showModalWithParams('AddDoctorController',  'client/doctors/addDoctor.tmpl.ng.html',ev, {doctor:null}, refreshDoctors);
     }
 
     $scope.createNewPatient = function(ev){
@@ -224,7 +236,7 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
     }
 
     $scope.save = function() {
-
+      
         $scope.study.analisys = [];
         var attentionJson = JSON.parse($scope.selectedAttention);
         $scope.study.attention = attentionJson._id;
@@ -278,7 +290,7 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
         }
 
         $scope.study.labsCounter = $scope.labsCounter;
-
+        $scope.study.creationDate = $scope.creationDate;
         $scope.studies.save($scope.study).then(function(number) {
             notificationService.showSuccess("Se ha registrado correctamente el estudio");
         }, function(error){
@@ -327,7 +339,7 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
     function createFilterFor(query) {
         var lowercaseQuery = angular.lowercase(query);
         return function filterFn(item) {
-            return (item.value.toLowerCase().indexOf(lowercaseQuery) >= 0);
+            return (item.fullName.toLowerCase().indexOf(lowercaseQuery) >= 0);
         };
     }
 

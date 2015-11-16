@@ -232,6 +232,11 @@ body{
     min-height: 100%;
 }
 
+.analisysHeader{ 
+    background-color: black;
+    color: white;
+}
+
 /**TABLE**/
 .center-table{
 

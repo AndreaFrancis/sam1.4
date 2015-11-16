@@ -71,21 +71,65 @@ if(Meteor.isServer){
         deleteUser : function(id){
             return Meteor.users.remove(id);
         },
-        findPatient: function(parameter){
+        createDiscriminatedReport :function(){
           var fut = new Future();
-          console.log("SAM-INFO: "+parameter);
-          Sql.q("select * from SE_HC where HCL_NOMBRE LIKE '%"+parameter+"%'", function(err, res){
-              console.log("SAM-INFO: B");
-                      if(err){
-                        console.log("ERRROR:"+ err);
-                      }else{
-                        res.forEach(function(r){
-                              console.log("i:"+r['HCL_NOMBRE']+" "+r['HCL_SEXO']+" "+r['HCL_APPAT']+" "+r['HCL_APMAT']+" "+r['HCL_NUMCI']+" "+r['HCL_CODIGO']+" "+r['HCL_DIRECC']+" "+r['HCL_TELDOM']);
-                        });
-                        console.log("SAM-INFO"+res.length);
-                        fut['return'](res);
-                      }
+
+          var keys = {};
+          var attentions = Attentions.find().fetch();
+          var services = Services.find().fetch();
+          attentions.forEach(function(attention){
+            var detail = {};
+            services.forEach(function(service){
+              detail[service._id] = 0;
+            });
+            keys[attention._id] = detail;
           });
+
+          var template = {};
+          var analisysList = Analisys.find().fetch();
+          analisysList.forEach(function(analisys){
+            var titles = {};
+            var titlesP = Titles.find({analisys:analisys._id}).fetch();
+            titlesP.forEach(function(title){
+              var exams = {};
+              var examsP = Exams.find({title:title._id}).fetch();
+              examsP.forEach(function(exam){
+                exams[exam._id] = {name:exam.name, result: JSON.parse(JSON.stringify(keys))}
+              });
+              titles[title._id] = {name: title.name, exams:exams};
+            });
+            template[analisys._id] = {name: analisys.name, titles:titles, result: JSON.parse(JSON.stringify(keys))};
+          });
+
+        keys.forEach(function(servicesArray,attentionKey){
+          angular.forEach(servicesArray, function(values,serviceKey){
+            var resultsByAttentionAndSer = $meteor.collection(function(){
+              return Studies.find(
+                {$and:[
+                       {"creationDate": {"$gte": pInitialDate, "$lt": pEndDate}}
+                  ,
+                   {"attention":attentionKey}
+                  ,
+                  {"service": serviceKey}
+              ]});
+            },false);
+
+            angular.forEach(resultsByAttentionAndSer, function(studyRes){
+              angular.forEach(studyRes.analisys, function(analisys){
+                var analisysCode = analisys.analisys;
+                angular.forEach(analisys.titles, function(title){
+                  var titleCode = title.title;
+                  angular.forEach(title.exams, function(exam){
+                    var examCode = exam.exam;
+                    $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+                    $scope.template[analisysCode].titles[titleCode].exams[examCode].result[attentionKey][serviceKey]+=1;
+                  });
+                });
+              });
+            });
+          });
+        });
+          fut['return'](template);
           return fut.wait();
         },
         findPatientByPay : function(bill){
@@ -117,7 +161,9 @@ if(Meteor.isServer){
                                   lastName : r[0]['HCL_APPAT'],
                                   lastNameMother:r[0]['HCL_APMAT'],
                                   medHis:r[0]['HCL_CODIGO'],
-                                  ci:r[0]['HCL_NUMCI']
+                                  ci:r[0]['HCL_NUMCI'],
+                                  address:r[0]['HCL_DIRECC'],
+                                  phone:r[0]['HCL_TELDOM']
                                 }
                                 Patients.insert(newPatient);
                                 newPatient = Patients.findOne({ci:ci});

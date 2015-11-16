@@ -76,12 +76,20 @@ angular.module('sam-1').service("ModalService", function($mdDialog){
       $mdDialog.show(confirm).then(onConfirm, onCancel);
     }
 
-    this.showModalWithParams = function(controller, urlTemplate, event, params) {
+    this.showModalWithParams = function(controller, urlTemplate, event, params, onOk, onCancel) {
         $mdDialog.show({
             controller: controller,
             templateUrl: urlTemplate,
             targetEvent : event,
             locals: params
+        }).then(function(){
+          if(!!onOk){
+            onOk();
+          }
+        }, function(){
+          if(!!onCancel){
+            onCancel();
+          }
         });
     }
 
@@ -210,7 +218,7 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
 });
 
 
-angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
+angular.module('sam-1').service("PrintService", function(TextEvaluatorService,SELECTORS){
     this.printCatalog = function(catalog){
       var newWin= window.open("");
       var style = "<style type='text/css'>table, th, td {border: 1px solid black;}"+
@@ -320,7 +328,6 @@ angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
       newWin.print();
       newWin.close();
     }
-
     this.printRoles = function(roles) {
       var text = "<tr><th>Nro</th><th>Nombre</th></tr>";
       var counter = 1;
@@ -432,22 +439,6 @@ angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
       this.printTableWithText("Reporte de doctores", text);
     }
 
-    this.printDoctors = function(doctors) {
-      var text = "<tr><th>Nro</th><th>Nombre</th><th>Apellido</th><th>Especialidad</th><th>Matricula</th></tr>";
-      var counter = 1;
-      angular.forEach(doctors, function(doctor){
-        text+="<tr>";
-        text+="<td>"+counter+"</td>";
-        text+="<td>"+doctor.name+"</td>";
-        text+="<td>"+doctor.lastName+"</td>";
-        text+="<td>"+doctor.especialism+"</td>";
-        text+="<td>"+doctor.enrolment+"</td>";
-        text+="</tr>";
-        counter++;
-      });
-      this.printTableWithText("Reporte de doctores", text);
-    }
-
     this.printPatients = function(patients) {
       var text = "<tr><th>Nro</th><th>Apellido</th><th>Nombre</th><th>CI</th></tr>";
       var counter = 1;
@@ -535,8 +526,83 @@ angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
       this.printTableWithText("Reporte de analisis", text);
     }
 
+    this.printReport = function(results, header, title){
+      var text = "<tr><th>Nro</th><th>Cod.</th><th>Fecha</th><th>Paciente</th><th>Edad</th><th>Doctor</th><th>Atencion</th><th>Servicio</th></tr>";
+      var counter = 1;
+      angular.forEach(results, function(result){
+        text+="<tr>";
+        text+="<td>"+counter+"</td>";
+        text+="<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(result.dailyCode)+"</td>";
+        text+="<td>"+result.creationDate.toLocaleDateString()+"</td>";
+        text+="<td>"+result.patientName+"</td>";
+        if(!!result.age){
+          text+="<td>"+result.age.value+" "+result.age.in+"</td>";  
+        }else{
+          text+="<td></td>";
+        }
+        text+="<td>"+result.doctorName+"</td>";
+        text+="<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(result.attentionName)+"</td>";
+        text+="<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(result.serviceName)+"</td>";
+        text+="</tr>";
+        counter++;
+      });
+      this.printTableWithText(title, text, header);
+    }
+    this.printReportStudies = function(results, initialDate, endDate){
+      var header = "<b>Fecha inicial:</b> "+initialDate.toLocaleDateString()+"<br/>";
+      header += "<b>Fecha final:</b> "+endDate.toLocaleDateString()+"<br/>";
+      header += "<b>Nro. resultados:</b> "+results.length+"<br/>";
+      this.printReport(results, header, "Reporte de estudios por fecha");
+    }
 
-    this.printTableWithText = function(title,text){
+    this.printReportStudiesByPatient = function(results, initialDate, endDate, gender,pInitialAge,pEndAge,selectedInType, nrPatients){
+      var header = "<b>Fecha inicial:</b> "+initialDate.toLocaleDateString()+"<br/>";
+      header += "<b>Fecha final:</b> "+endDate.toLocaleDateString()+"<br/>";
+      header += "<b>Nro. Pacientes:</b> "+nrPatients+"<br/>";
+      header += "<b>Nro. resultados:</b> "+results.length+"<br/>";
+      header += "<b>Genero:</b> "+gender+"<br/>";
+      header += "<b>Edad:</b> "+pInitialAge+" a "+pEndAge+" "+selectedInType+"<br/>";
+      this.printReport(results, header, "Reporte de estudios por paciente");
+    }
+
+    this.printReportStudiesByProcedence = function(results, initialDate, endDate,attention, service){
+      var header = "<b>Fecha inicial:</b> "+initialDate.toLocaleDateString()+"<br/>";
+      header += "<b>Fecha final:</b> "+endDate.toLocaleDateString()+"<br/>";
+      header += "<b>Nro. resultados:</b> "+results.length+"<br/>";
+      header += "<b>Atencion:</b> "+attention.name+"<br/>";
+      header += "<b>Servicio:</b> "+service.name+"<br/>";
+      this.printReport(results, header, "Reporte de estudios por procedencia");
+    }
+
+    this.printReportStudiesByAnalisys = function(results, initialDate, endDate, analisys){
+      var header = "<b>Fecha inicial:</b> "+initialDate.toLocaleDateString()+"<br/>";
+      header += "<b>Fecha final:</b> "+endDate.toLocaleDateString()+"<br/>";
+      header += "<b>Nro. resultados:</b> "+results.length+"<br/>";
+      header += "<b>Análisis:</b> "+analisys.name+"<br/>";
+      this.printReport(results, header, "Reporte de estudios por analisis");
+    }
+  
+    this.printHistorialOfExam = function(exam, study){
+      var header = "<b>Codigo:</b> "+study.dailyCode+"<br/>";
+      header += "<b>Examen:</b> "+exam.name()+"<br/>";
+      header += "<b>Paciente:</b> "+(study.patientObj.lastName||"")+" "+(study.patientObj.lastNameMother||"")+" "+(study.patientObj.name||"")+"<br/>";
+      header += "<b>Fecha de creación:</b> "+study.creationDate.toLocaleDateString()+"<br/>";
+      header += "<b>Recibo:</b> "+(study.bill||"")+"<br/>";
+      var text = "<tr><th>Nro</th><th>Usuario</th><th>Fecha</th><th>Valor</th></tr>";
+      var counter = 1;
+      angular.forEach(exam.historial, function(p){
+        text+="<tr>";
+        text+="<td>"+counter+"</td>";
+        text+="<td>"+p.userName+"</td>";
+        text+="<td>"+p.date.toLocaleDateString()+"</td>";
+        text+="<td>"+p.value+"</td>";
+        text+="</tr>";
+        counter++;
+      });
+      this.printTableWithText("Historial de modificacion",text, header);
+    }
+
+    this.printTableWithText = function(title,text,tableHeader){
       var newWin= window.open("");
 
       var style = "<style type='text/css'>table {min-width:50%;  margin-left:auto; margin-right:auto;} table, th, td {border: 1px solid black;}"+
@@ -555,6 +621,10 @@ angular.module('sam-1').service("PrintService", function(TextEvaluatorService){
       newWin.document.write("<b class='header'>Instituto de Gastroenterología Boliviano Japonés</b><br/>");
       newWin.document.write("<b class='header'>Cochabamba - Bolivia</b><br/>");
       newWin.document.write("<h1>"+title+"</h1>");
+      newWin.document.write("<hr>");
+      if(!!tableHeader){
+        newWin.document.write(tableHeader);
+      }
       newWin.document.write("<hr>");
       newWin.document.write("<table>");
       newWin.document.write(text);

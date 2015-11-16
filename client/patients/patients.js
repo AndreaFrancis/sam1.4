@@ -6,7 +6,7 @@ angular.module("sam-1").controller("PatientsListCtrl",['$scope','notificationSer
         $scope.page = 1;
         $scope.perPage = 3;
         $scope.sort = {lastName: 1};
-        $scope.headers = ['Apellidos', 'Nombre','Ci', 'Acciones'];
+        $scope.headers = ['Apellidos', 'Nombre','Ci','Edad', 'Acciones'];
         
         Meteor.subscribe('counters', function() {
           $scope.patientsCount = $meteor.object(Counts ,'patients', false);

@@ -110,6 +110,10 @@
         </div>
           <!--End Autocompletet-->
   </div>
+  <div  layout="row">
+                <span flex><b>Cama:</b> {{study.internData.bed}}</span>
+                <span flex><b>Sala:</b> {{study.internData.room}}</span>
+  </div>
   <!--End row-->
 
   <!--Start eow-->
@@ -118,18 +122,6 @@
       <label>Diagnostico</label>
       <input ng-model="study.diagnostic"  name="diagnostic">
     </md-input-container>
-    <!--Startintern-->
-    <div ng-show="internData" layout="row">
-        <md-input-container flex>
-          <label>Cama</label>
-          <input ng-model="study.internData.bed"  name="bed">
-        </md-input-container>
-        <md-input-container flex>
-          <label>Sala</label>
-          <input ng-model="study.internData.room"  name="room">
-        </md-input-container>
-    </div>
-    <!--End intern-->
   </div>
   <!--End eow-->
   <!--Start row-->
@@ -156,7 +148,7 @@
               <!--Start panel-->
               <div class="panel panel-default">
                 <!--Start table-->
-                <div ng-repeat="analisys in study.analisys">
+                <div ng-repeat="analisys in analisysList">
                   <div ng-show="analisys.lab() == myLab || isDoctor">
                   <md-toolbar md-scroll-shrink>
                     <div class="md-toolbar-tools">

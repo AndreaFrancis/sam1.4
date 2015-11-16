@@ -263,8 +263,9 @@ var saveAs = saveAs || (function(view) {
  * Created by Andrea on 22/07/2015.
  */
 
- angular.module("sam-1").controller("ReportsCtrl",['$scope','$meteor','notificationService','ModalService','AgeCalculatorService',
-    function($scope, $meteor,notificationService, ModalService, AgeCalculatorService) {
+ angular.module("sam-1").controller("ReportsCtrl",['$scope','$meteor','notificationService','ModalService','AgeCalculatorService','PrintService','SELECTORS',
+    function($scope, $meteor,notificationService, ModalService, AgeCalculatorService, PrintService,SELECTORS) {
+      $scope.selectors = SELECTORS;
       $scope.inTypes = AgeCalculatorService.inTypes;
       $scope.initialDate = new Date();
       $scope.endDate = new Date();
@@ -273,42 +274,54 @@ var saveAs = saveAs || (function(view) {
       $scope.services = $meteor.collection(Services, false);
       $scope.attentions = $meteor.collection(Attentions, false);
       $scope.results = [];
+      $scope.completeStatistics = false;
 
-      //Statistics
-      $scope.keys = {};
-      angular.forEach($scope.attentions, function(attention){
-        var detail = {};
-        angular.forEach($scope.services, function(service){
-          detail[service._id] = 0;
-        });
-        $scope.keys[attention._id] = detail;
-      });
-
-
-      $scope.createDateReport = function(initialDate, endDate){
-        $scope.results = $meteor.collection(function(){
-          return Studies.find(
-            {
-              "creationDate": {"$gte": initialDate, "$lt": endDate}
-            }
-            ,{
-            transform:function(doc){
+      var transformFunction = function(doc){
               if(doc.patient){
                 var patient = $meteor.object(Patients, doc.patient);
                 doc.patientName = patient.lastName+" "+patient.lastNameMother+" "+patient.name;
-                doc.age = {value:patient.age.value, in : patient.age.in};
-								//doc.age = $scope.calculateAge(patient.birthdate);
+                if(!!patient.age){
+                	doc.age = {value:patient.age.value, in : patient.age.in};
+                }
               }
               if(doc.doctor){
                 var doctor = $meteor.object(Doctors,doc.doctor);
                 doc.doctorName = doctor.lastName + " " + doctor.name;
               }
+              if(doc.attention){
+                	var attentionEs = $meteor.object(Attentions, doc.attention);
+                  	doc.attentionName = attentionEs.name;
+                }
+                if(doc.service){
+                	var serviceEs = $meteor.object(Services, doc.service);
+                  	doc.serviceName = serviceEs.name;
+                }
               return doc;
-            }
-          });
-        },false);
+        };
+
+      
+
+      $scope.changeStatisticType = function(statisticType){
+      	$scope.completeStatistics = !($scope.completeStatistics);
+      	console.log(statisticType);
       }
+      $scope.createDateReport = function(initialDate, endDate){
+      	$scope.initialDate = initialDate;
+      	$scope.endDate = endDate;
+        $scope.results = Studies.find(
+            {
+              "creationDate": {"$gte": initialDate, "$lte": endDate}
+            }
+            ,{
+            transform: transformFunction,
+            sort: {creationDate:1}
+          }).fetch();
+        $scope.nroResults = $scope.results.length;
+       };
+
       $scope.createPatientReport = function(pInitialDate,pEndDate, gender,pInitialAge,pEndAge,selectedInType){
+        $scope.initialDate = pInitialDate;
+        $scope.endDate = pEndDate;
         var genderPatients = $meteor.collection(function(){
             return Patients.find({$and:[
               {"age.value": {"$gte": pInitialAge, "$lte": pEndAge}},
@@ -320,103 +333,73 @@ var saveAs = saveAs || (function(view) {
         angular.forEach(genderPatients, function(patient){
             patientIds.push(patient._id);
         });
+        $scope.nroResultsPatient = genderPatients.length;
 
-        $scope.results = $meteor.collection(function(){
-            return Studies.find(
+        $scope.results = Studies.find(
             {$and:[
-              {"creationDate": {"$gte": pInitialDate, "$lt": pEndDate}},
+              {"creationDate": {"$gte": pInitialDate, "$lte": pEndDate}},
               {"patient":{$in:patientIds}}
             ]}
               ,{
-                transform:function(doc){
-                  if(doc.patient){
-                    var patient = $meteor.object(Patients, doc.patient);
-                    doc.patientName = patient.lastName+" "+patient.lastNameMother+" "+patient.name;
-                    doc.age = patient.age;
-                    doc.gender = patient.gender;
-                  }
-                  if(doc.doctor){
-                    var doctor = $meteor.object(Doctors,doc.doctor);
-                    doc.doctorName = doctor.lastName + " " + doctor.name;
-                  }
-                  return doc;
-                }
-              });
-            },false);
-
+                transform: transformFunction,
+            	sort: {creationDate:1}
+              }).fetch();
+        	$scope.nroResults = $scope.results.length;
       }
       $scope.createAnalisysReport = function(initialDate, endDate, selectedAnalisys){
-        $scope.results = $meteor.collection(function(){
-          return Studies.find(
+        $scope.results = Studies.find(
             {$and:[
-                   {"creationDate": {"$gte": initialDate, "$lt": endDate}}
+                   {"creationDate": {"$gte": initialDate, "$lte": endDate}}
                    ,
                   {"analisys":{
-                       $elemMatch:{"analisys":selectedAnalisys  }
+                       $elemMatch:{"analisys":selectedAnalisys._id  }
                       }
                 }
             ]}
             ,{
-            transform:function(doc){
-              if(doc.patient){
-                var patient = $meteor.object(Patients, doc.patient);
-                doc.patientName = patient.lastName+" "+patient.lastNameMother+" "+patient.name;
-								doc.age = {value:patient.age.value, in : patient.age.in};
-                //doc.age = $scope.calculateAge(patient.birthdate);
-              }
-              if(doc.doctor){
-                var doctor = $meteor.object(Doctors,doc.doctor);
-                doc.doctorName = doctor.lastName + " " + doctor.name;
-              }
-              return doc;
-            }
-          });
-        },false);
+            	transform: transformFunction,
+            	sort: {creationDate:1}
+          }).fetch();
+        $scope.nroResults = $scope.results.length;
       }
 
 
       $scope.createProcedenceReport = function(initialDate, endDate, attention, service){
-          $scope.results = $meteor.collection(function(){
-            return Studies.find(
-              {$and:[
-                     {"creationDate": {"$gte": initialDate, "$lt": endDate}}
-                ,
-                 {"attention":attention}
-                ,
-                {"service": service}
-              ]}
+          var query = [{"creationDate": {"$gte": initialDate, "$lte": endDate}}];
+          if(attention != $scope.selectors.ALL){
+          	query.push({"attention":attention._id});
+          }
+          if(service != $scope.selectors.ALL){
+          	query.push({"service":service._id});	
+          }
+          $scope.results =  Studies.find(
+              {$and:query}
               ,{
-              transform:function(doc){
-                if(doc.patient){
-                  var patient = $meteor.object(Patients, doc.patient);
-                  doc.patientName = patient.lastName+" "+patient.lastNameMother+" "+patient.name;
-									doc.age = {value:patient.age.value, in : patient.age.in};
-                  //doc.age = $scope.calculateAge(patient.birthdate);
-                }
-                if(doc.doctor){
-                  var doctor = $meteor.object(Doctors,doc.doctor);
-                  doc.doctorName = doctor.lastName + " " + doctor.name;
-                }
-                return doc;
-              }
-            });
-          },false);
+              	transform: transformFunction,
+            	sort: {creationDate:1}
+            }).fetch();
+			$scope.nroResults = $scope.results.length;
       }
 
 
       $scope.createDiscriminated = function(pInitialDate,pEndDate){
+      	$scope.keys = {};
+      	angular.forEach($scope.attentions, function(attention){
+        	var detail = {};
+        	angular.forEach($scope.services, function(service){
+        	  	detail[service._id] = 0;
+        	});
+        	$scope.keys[attention._id] = detail;
+      	});
+
         $scope.template = {};
         var analisysList = $meteor.collection(Analisys,false);
         angular.forEach(analisysList, function(analisys){
           var titles = {};
-          var titlesP = $meteor.collection(function(){
-              return Titles.find({analisys:analisys._id});
-          },false);
+          var titlesP = Titles.find({analisys:analisys._id}).fetch();
           angular.forEach(titlesP, function(title){
             var exams = {};
-            var examsP = $meteor.collection(function(){
-                return Exams.find({title:title._id});
-            },false);
+            var examsP = Exams.find({title:title._id}).fetch();
             angular.forEach(examsP, function(exam){
                 exams[exam._id] = {name:exam.name, result: JSON.parse(JSON.stringify($scope.keys))}
             });
@@ -427,17 +410,14 @@ var saveAs = saveAs || (function(view) {
 
         angular.forEach($scope.keys, function(servicesArray,attentionKey){
           angular.forEach(servicesArray, function(values,serviceKey){
-            var resultsByAttentionAndSer = $meteor.collection(function(){
-              return Studies.find(
+            var resultsByAttentionAndSer = Studies.find(
                 {$and:[
-                       {"creationDate": {"$gte": pInitialDate, "$lt": pEndDate}}
+                       {"creationDate": {"$gte": pInitialDate, "$lte": pEndDate}}
                   ,
                    {"attention":attentionKey}
                   ,
                   {"service": serviceKey}
-              ]});
-            },false);
-
+              ]}).fetch();
             angular.forEach(resultsByAttentionAndSer, function(studyRes){
               angular.forEach(studyRes.analisys, function(analisys){
                 var analisysCode = analisys.analisys;
@@ -462,15 +442,19 @@ var saveAs = saveAs || (function(view) {
        saveAs(blob, "Discriminado.xls");
      };
 
-      $scope.printDiv = function (divName)
-      {
-        var divToPrint=document.getElementById(divName);
-        newWin= window.open("");
-        newWin.document.write(divToPrint.outerHTML);
-        newWin.print();
-        newWin.close();
+      $scope.printReport = function(){
+      	PrintService.printReportStudies($scope.results, $scope.initialDate, $scope.endDate);
       }
 
+      $scope.printReportByProcedence = function(){
+      	PrintService.printReportStudiesByProcedence($scope.results, $scope.initialDate, $scope.endDate, $scope.selectedAttention,$scope.selectedService);
+      }
 
+      $scope.printReportByPatient = function(){
+      	PrintService.printReportStudiesByPatient($scope.results, $scope.initialDate, $scope.endDate, $scope.gender,$scope.pInitialAge,$scope.pEndAge,$scope.selectedInType, $scope.nroResultsPatient);
+      }
 
+      $scope.printReportByAnalisys = function(pInitialDate,pEndDate,selectedAnalisys){
+      	PrintService.printReportStudiesByAnalisys($scope.results, pInitialDate, pEndDate, selectedAnalisys);
+      }
 }]);
