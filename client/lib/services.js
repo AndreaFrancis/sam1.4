@@ -177,6 +177,42 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
       return detail;
     }
 
+    var majorEval = function(val, range){
+      var detail = {result:"Fuera de rango", correct:false};
+      var i = 0;
+      var found = false;
+      while(i<range.fields.length && !found){
+        if(range.fields[i].name == "valor"){
+          found = true;
+          var equalValue = range.fields[i].value;
+          if(equalValue < val){
+            detail.result = range.name;
+            detail.correct = true;
+          }
+        }
+        i++;
+      }
+      return detail;
+    }
+
+    var minorEval = function(val, range){
+      var detail = {result:"Fuera de rango", correct:false};
+      var i = 0;
+      var found = false;
+      while(i<range.fields.length && !found){
+        if(range.fields[i].name == "valor"){
+          found = true;
+          var equalValue = range.fields[i].value;
+          if(equalValue > val){
+            detail.result = range.name;
+            detail.correct = true;
+          }
+        }
+        i++;
+      }
+      return detail;
+    }
+
     var betweenEval = function(val, range){
       var detail = {result:"Fuera de rango", correct:false};
       var i = 0;
@@ -199,6 +235,7 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
         }
         i++;
     }
+
     var initial = parseInt(initial);
     var final = parseInt(final);
     if(initial != undefined && final!= undefined){
@@ -215,6 +252,8 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
     this.evaluatorsMap = {};
     this.evaluatorsMap['Igual'] = equalEval;
     this.evaluatorsMap['Entre'] = betweenEval;
+    this.evaluatorsMap['Mayor'] = majorEval;
+    this.evaluatorsMap['Menor'] = minorEval;
 });
 
 

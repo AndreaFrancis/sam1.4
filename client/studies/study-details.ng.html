@@ -1,13 +1,14 @@
+<form name="newStudyForm" novalidate>
 <div class="row">
       <div class="col-lg-12">
           <h1 class="page-header">
-            <md-button class="md-fab" aria-label="Estudio" ng-click="printStudy()" ng-if="isBioquimic">
+            <md-button type="button" class="md-fab" aria-label="Estudio" ng-click="printStudy($event)" ng-if="isBioquimic">
                 <i class="fa fa-print"></i>
             </md-button>
-            <md-button class="md-fab md-primary" ng-click="printContainer()" aria-label="Sobre" ng-if="isBioquimic">
+            <md-button type="button" class="md-fab md-primary" ng-click="printContainer()" aria-label="Sobre" ng-if="isBioquimic">
                       <i class="fa fa-envelope-o"></i>
             </md-button>
-            <md-button class="md-fab md-primary" ng-click="printOrder()" aria-label="Print order" ng-if="isDoctor">
+            <md-button type="button" class="md-fab md-primary" ng-click="printOrder()" aria-label="Print order" ng-if="isDoctor">
                       <i class="fa fa-print"></i>
             </md-button>
             Estudio
@@ -20,7 +21,7 @@
     <div  ng-if="isBioquimic" layout="row">
       <md-input-container flex >
         <label>Codigo</label>
-        <input ng-model="study.dailyCode"  name="dailyCode" daily-study date="{{study.creationDate}}"  code={{study.dailyCode}}>
+        <input ng-model="study.dailyCode"  name="dailyCode" daily-study date="{{study.creationDate.toString()}}">
         <div ng-messages="newStudyForm.dailyCode.$error" ng-if="newStudyForm.dailyCode.$dirty">
             <div ng-message="duplicated">*El estudio ya fue programado</div>
           </div>
@@ -70,7 +71,7 @@
                   </span>
                   </md-item-template>
               </md-autocomplete>
-              <md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewPatient($event)">
+              <md-button type="button" class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewPatient($event)">
                   <i class="fa fa-plus"></i>
               </md-button>
           </div>
@@ -103,7 +104,7 @@
                   </span>
                   </md-item-template>
               </md-autocomplete>
-              <md-button class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewDoctor($event)">
+              <md-button type="button" class="md-icon-button" flex  aria-label="Nuevo" ng-click="createNewDoctor($event)">
                   <i class="fa fa-plus"></i>
               </md-button>
           </div>
@@ -135,7 +136,7 @@
       <input ng-model="study.creationDate"  name="creationDate" type="date">
     </md-input-container>
   </div>
-  <md-button class="md-icon-button" flex  aria-label="Guardar" ng-click="saveStudy($event)" ng-if="isBioquimic">
+  <md-button type="button"  class="md-icon-button" flex ng-disabled="newStudyForm.$invalid" aria-label="Guardar" ng-click="saveStudy($event)" ng-if="isBioquimic">
       <i class="fa fa-save"></i>
   </md-button>
   <!--end row-->
@@ -174,25 +175,16 @@
                                       <td data-title="Responsable" ng-if="isBioquimic">{{exam.responsible}} </td>
                                       <td data-title="Historial" ng-if="isBioquimic">
                                         <div layout="row">
-                                          <md-button class="md-icon-button" flex  aria-label="Historial" ng-click="showHistorial(exam,$event)">
+                                          <md-button type="button" class="md-icon-button" flex  aria-label="Historial" ng-click="showHistorial(exam,$event)">
                                             <i class="fa fa-file-text-o"></i>
                                           </md-button>
-                                          <!--md-button class="md-icon-button" flex  aria-label="Editar" ng-click="edit=true" ng-hide="edit">
-                                            <i class="fa fa-pencil-square-o"></i>
-                                          </md-button>
-                                          <md-button class="md-icon-button" flex  aria-label="Cancelar" ng-click="edit=false" ng-show="edit">
-                                            <i class="fa fa-minus"></i>
-                                          </md-button>
-                                          <md-button class="md-icon-button" flex  aria-label="Guardar" ng-click="edit=false;save(exam)" ng-show="edit">
-                                            <i class="fa fa-floppy-o"></i>
-                                          </md-button-->
                                         </div>
                                       </td>
                                       <td data-title="Examen">{{exam.name()}}</td>
                                       <td data-title="Resultado">
                                         <md-input-container>
                                           <label></label>
-                                          <input ng-model="exam.result"  name="result" ng-keyup="$event.keyCode == 13 && save(exam)">
+                                          <input ng-model="exam.result"  name="result" ng-keyup="$event.keyCode == 13 && save(exam,$index,$parent.$index,$parent.$parent.$index)">
                                         </md-input-container>
                                       </td>
                                       <td data-title="U. Med">
@@ -230,3 +222,4 @@
 </div>
 <!--End page wrapper-->
 </div>
+</form>

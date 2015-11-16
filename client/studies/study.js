@@ -145,7 +145,7 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
             $state.go('studies');
         }
 
-        $scope.save = function(exam) {
+        $scope.save = function(exam,examIndex,titleIndex, analisysIndex) {
 
           delete $scope.study.patientObj;
           delete $scope.study.doctorObj;
@@ -154,7 +154,8 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           delete $scope.study.attentionName;
           delete $scope.study._serverBackup;
 
-
+          var examFromAnalisys = $scope.study.analisys[analisysIndex].titles[titleIndex].exams[examIndex];
+          examFromAnalisys.result = exam.result;
           var detail = "";
           var ranges = exam.ranges();
 
@@ -165,7 +166,9 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
               if(evaluator){
                 var detail = evaluator(exam.result, range);
                 exam.detail = detail.result;
+                examFromAnalisys.detail = detail.result;
                 exam.state = detail.correct;
+                examFromAnalisys.state = detail.correct;
               }
           });
           //Historial
@@ -174,7 +177,8 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           partialRecord.value = exam.result;
           partialRecord.user = userAsigned;
           partialRecord.date = new Date();
-          exam.historial.push(partialRecord);
+          //exam.historial.push(partialRecord);
+          examFromAnalisys.historial.push(partialRecord);
           $scope.study.save()
           .then(function(number) {
           refreshStudy();
@@ -250,7 +254,58 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           newWin.close();
         }
 
-        $scope.printStudy = function(){
+        $scope.printStudy = function(ev){
+          ModalService.showModalWithParams(PrintResultController,  'client/studies/printStudy.ng.html',ev, {study:$scope.study,analisysList:$scope.analisysList});
+         }
+    }]);
+
+
+function HistorialController($scope,$mdDialog, exam,study, $meteor, DateService, PrintService) {
+        if(exam) {
+          $scope.exam = exam;
+          $scope.study = study;
+        }
+        $scope.dateService = DateService;
+        angular.forEach($scope.exam.historial, function(modification){
+          var user = $meteor.object(Users, modification.user);
+          modification.userName = user.profile.name||"" + " "+ user.profile.lastName||"";
+        });
+
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        }
+        $scope.print = function(){
+            PrintService.printHistorialOfExam($scope.exam, $scope.study);
+        }
+}
+
+function PrintResultController($scope,$mdDialog, study,analisysList, $meteor, PrintService, TextEvaluatorService) {
+        $scope.study = study;
+        $scope.analisysList = analisysList;
+
+        $scope.selectAnalisys = function(analisys) {
+          angular.forEach(analisys.titles, function(title) {
+            $scope.selectTitle(title);
+            title.selected = !analisys.selected;
+          });
+        };
+
+        $scope.selectTitle = function(title, analisys) {
+          angular.forEach(title.exams, function(exam) {
+            exam.selected = !title.selected;
+          });
+          analisys.selected = true;
+        }
+
+        $scope.selectExam = function(exam, title, analisys){
+          title.selected = true;
+          analisys.selected = true; 
+        }
+
+        $scope.cancel = function() {
+            $mdDialog.cancel();
+        }
+        $scope.print = function(){
           var newWin= window.open("");
           var width = localStorage.getItem("width");
           var heigth = localStorage.getItem("heigth");
@@ -279,7 +334,7 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           newWin.document.write("</td>");
           newWin.document.write("</tr>");
           newWin.document.write("</table>");
-          newWin.document.write("<h1>Resultado de examenes</h1>");
+          newWin.document.write("<h1>Resultado de estudio</h1>");
           newWin.document.write("<hr>");
           newWin.document.write("<b>Paciente: </b>"+$scope.study.patientObj.lastName+" "+
           $scope.study.patientObj.lastNameMother+" "+$scope.study.patientObj.name+"<br>");
@@ -300,64 +355,46 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           }
           newWin.document.write("<hr>");
           angular.forEach($scope.analisysList, function(analisys){
-              newWin.document.write("<h3>"+analisys.name()+"</h3>");
-              angular.forEach(analisys.titles, function(title){
-                newWin.document.write("<b>"+title.name()+"<b><br/>");
-                newWin.document.write("<table>");
-                newWin.document.write("<tr><th>Examen</th><th>Resultado</th><th>U. Med</th><th>Referencia</th><th>Detalle</th></tr>");
-                  angular.forEach(title.exams, function(exam){
-                    newWin.document.write("<tr>");
-                    //Exam name
-                    newWin.document.write("<td>"+exam.name()+"</td>");
-                    //Result
-                    newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.result)+"</td>");
-                    if(exam.symbol){
-                      newWin.document.write("<td>"+exam.symbol()+"</td>");
-                    }else{
-                      newWin.document.write("<td></td>");
-                    }
-                    //Reference
-                    if(exam.ranges()){
-                      newWin.document.write("<td>");
-                        angular.forEach(exam.ranges(), function(range){
-                          var rangeText = range.name+" - "+range.typeName()+" ";
-                          angular.forEach(range.fields, function(field){
-                            rangeText+= field.name+": "+field.value+" ";
-                          });
-                          newWin.document.write("<p>"+rangeText+"</p>");
+              if(analisys.selected){
+                  newWin.document.write("<h3>"+analisys.name()+"</h3>");
+                  angular.forEach(analisys.titles, function(title){
+                    if(title.selected){
+                        newWin.document.write("<b>"+title.name()+"<b><br/>");
+                        newWin.document.write("<table>");
+                        newWin.document.write("<tr><th>Examen</th><th>Resultado</th><th>U. Med</th><th>Referencia</th><th>Detalle</th></tr>");
+                        angular.forEach(title.exams, function(exam){
+                          if(exam.selected){
+                              newWin.document.write("<tr>");
+                              newWin.document.write("<td>"+exam.name()+"</td>");
+                            newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.result)+"</td>");
+                            if(exam.symbol){
+                              newWin.document.write("<td>"+exam.symbol()+"</td>");
+                            }else{
+                              newWin.document.write("<td></td>");
+                            }
+                            if(exam.ranges()){
+                              newWin.document.write("<td>");
+                              angular.forEach(exam.ranges(), function(range){
+                              var rangeText = range.name+" - "+range.typeName()+" ";
+                              angular.forEach(range.fields, function(field){
+                                rangeText+= field.name+": "+field.value+" ";
+                              });
+                              newWin.document.write("<p>"+rangeText+"</p>");
+                              });
+                              newWin.document.write("</td>");
+                            }                    
+                            newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.detail)+"</td>");
+                            newWin.document.write("</tr>");
+                          }
                         });
-                      newWin.document.write("</td>");
+                        newWin.document.write("</table>");
+                        newWin.document.write("<br class=”break”/>");
                     }
-                    //Details
-                    newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.detail)+"</td>");
-                    newWin.document.write("</tr>");
                   });
-                newWin.document.write("</table>");
-                newWin.document.write("<br class=”break”/>");
-              });
+              }
           });
           newWin.document.write("</body></html>");
           newWin.print();
-          newWin.close();
-        }
-    }]);
-
-
-function HistorialController($scope,$mdDialog, exam,study, $meteor, DateService, PrintService) {
-        if(exam) {
-          $scope.exam = exam;
-          $scope.study = study;
-        }
-        $scope.dateService = DateService;
-        angular.forEach($scope.exam.historial, function(modification){
-          var user = $meteor.object(Users, modification.user);
-          modification.userName = user.profile.name||"" + " "+ user.profile.lastName||"";
-        });
-
-        $scope.cancel = function() {
-            $mdDialog.cancel();
-        }
-        $scope.print = function(){
-            PrintService.printHistorialOfExam($scope.exam, $scope.study);
+          newWin.close();          
         }
 }
