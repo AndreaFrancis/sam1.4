@@ -25,36 +25,34 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                             $scope.study.patientObj = patientObj;
                           }
           }
-
           $scope.study.doctorObj = {};
-                      if(!!$scope.study.doctor){
-                        var doctorObj = $meteor.object(Doctors, $scope.study.doctor);
-                        if(doctorObj) {
-                          $scope.study.doctorObj = doctorObj;
-                        }
-                      }
-
-                      $scope.study.creatorName = {};
-                      if($scope.study.creatorId) {
-                          var creatorName = $meteor.object(Users, $scope.study.creatorId);
-                          if(creatorName) {
-                              $scope.study.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
-                          }
-                      }
-                      $scope.study.serviceName = {};
-                      if($scope.study.service) {
-                          var service = $meteor.object(Services, $scope.study.service);
-                          if(service) {
-                              $scope.study.serviceName = service.name;
-                          }
-                      }
-                      $scope.study.attentionName = {};
-                      if($scope.study.attention) {
+          if(!!$scope.study.doctor){
+            var doctorObj = $meteor.object(Doctors, $scope.study.doctor);
+            if(doctorObj) {
+               $scope.study.doctorObj = doctorObj;
+            }
+          }
+          $scope.study.creatorName = {};
+          if($scope.study.creatorId) {
+            var creatorName = $meteor.object(Users, $scope.study.creatorId);
+            if(creatorName) {
+              $scope.study.creatorName = creatorName.profile.name + " "+ creatorName.profile.lastName;
+            }
+          }
+          $scope.study.serviceName = {};
+             if($scope.study.service) {
+               var service = $meteor.object(Services, $scope.study.service);
+               if(service) {
+                  $scope.study.serviceName = service.name;
+                }
+             }
+          $scope.study.attentionName = {};
+          if($scope.study.attention) {
                           var attention = $meteor.object(Attentions, $scope.study.attention);
                           if(attention) {
                               $scope.study.attentionName = attention.name;
                           }
-                      }
+          }
         }
         if($stateParams.studyId){
           $scope.isExistingStudy = true;
@@ -63,8 +61,6 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
           $scope.selectedAttention = $meteor.object(Attentions, $scope.study.attention);
           $scope.selectedService = $meteor.object(Services, $scope.study.service);
           $scope.analisysList = $scope.study.analisys;
-          //Fill analisis, titles, exams
-          //angular.forEach($scope.study.analisys, function(analisys){
           angular.forEach($scope.analisysList, function(analisys){
             var analisysName = $meteor.object(Analisys, analisys.analisys);
             analisys.lab = function(){
@@ -80,37 +76,40 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                 };
                 angular.forEach(title.exams, function(exam){
                     var examTitle = $meteor.object(Exams, exam.exam);
-                    exam.name = function(){
-                      return examTitle.name;
-                    }
-
-                    if(!!exam.historial){
-                      var lastModifier = exam.historial.length-1;
-                      if(lastModifier>=0){
-                        var userId = exam.historial[lastModifier].user;
-                        var responsible = $meteor.object(Users, userId);
-                        exam.responsible =   responsible.username;
+                    var i = 0;
+                    angular.forEach(exam.results, function(e){
+                      var real = examTitle.exams[i];
+                      e.name = function(){
+                        return real.name;
                       }
-                    }
-
-                    if(examTitle.measure){
-                      var measure = $meteor.object(Measures,examTitle.measure);
-                      exam.symbol = function(){
-                        return measure.symbol;
-                      }
-                    }
-                    if(examTitle.ranges){
-                      angular.forEach(examTitle.ranges, function(range){
-                        range.typeName = function(){
-                            return $meteor.object(TypeEvaluation, range.type,false).name;
+                      if(!!e.historial){
+                        var lastModifier = e.historial.length-1;
+                        if(lastModifier>=0){
+                          var userId = e.historial[lastModifier].user;
+                          var responsible = $meteor.object(Users, userId);
+                          e.responsible =   responsible.username;
                         }
-                      });
-
-                      exam.ranges = function(){
-                        return examTitle.ranges;
                       }
-
-                    }
+                      if(real){
+                          if(real.measure){
+                            var measure = $meteor.object(Measures,real.measure);
+                            e.symbol = function(){
+                              return measure.symbol;
+                            }
+                          }
+                          e.ranges = function(){
+                            return real.ranges;
+                          }
+                          if(real.ranges){
+                            angular.forEach(e.ranges(), function(range){
+                              range.typeName = function(){
+                                return $meteor.object(TypeEvaluation, range.type,false).name;
+                              }
+                            });
+                        }
+                      }
+                      i++;
+                    });
                 });
             });
         });

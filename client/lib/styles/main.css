@@ -214,6 +214,15 @@ a {
   max-width: 40%;
 }
 
+.md-large-large-dialog {
+  min-height: 80%;
+  max-height: 80%;
+  min-width: 50%;
+  max-width: 50%;
+}
+
+
+
 /**TOOLBAR**/
 .long-toolbar {
     height: 200px;

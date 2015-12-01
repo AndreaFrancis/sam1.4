@@ -6,7 +6,7 @@ angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalSer
         $scope.page = 1;
         $scope.perPage = 3;
         $scope.sort = {name: 1};
-        $scope.headers = ["Nombre","Medida","Titulo", "Rangos", "Acciones"];
+        $scope.headers = ["Elementos","Titulo","Acciones"];
         $scope.titles = $meteor.collection(Exams, false);
 
         Meteor.subscribe('counters', function() {
@@ -16,13 +16,6 @@ angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalSer
         $scope.update = function(){
           $scope.exams = Exams.find({active:true}, {
                 transform: function(doc) {
-                    doc.measureSymbol = '';
-                    if(doc.measure) {
-                        var measureSymbol = $meteor.object(Measures,doc.measure);
-                        if(measureSymbol){
-                          doc.measureSymbol = measureSymbol.symbol;
-                        }
-                    }
                     if(doc.title) {
                         var title = $meteor.object(Titles,doc.title);
                         if(title){
@@ -95,12 +88,17 @@ angular.module("sam-1").controller("ExamsListCtrl",['$scope','$meteor','ModalSer
     }]);
 
 function AddExamCtrl($scope, $meteor, notificationService, exam,$mdDialog) {
+    $scope.examSet = {};
+    $scope.examSet.active = true;
+    $scope.examSet.visible = false;
+    $scope.examSet.selectable = false;
+    $scope.examSet.exams = [];
+    $scope.genders = ['M','F','A'];
+    $scope.exam = {};
+    $scope.exam.ranges = [];
     if(exam){
-      $scope.exam = exam;
-      $scope.selectedTitle = $meteor.object(Titles, $scope.exam.title);
-    }else{
-      $scope.exam = {};
-      $scope.exam.ranges = [];
+      $scope.examSet = exam;
+      $scope.selectedTitle = $meteor.object(Titles, $scope.examSet.title);
     }
 
 
@@ -140,7 +138,7 @@ function AddExamCtrl($scope, $meteor, notificationService, exam,$mdDialog) {
 
     $scope.saveRange = function() {
         var range = {
-            name: $scope.newRange.name,
+            gender: $scope.gender,
             type : $scope.selectedType._id,
             fields : [],
             typeName : $scope.selectedType.name
@@ -156,20 +154,29 @@ function AddExamCtrl($scope, $meteor, notificationService, exam,$mdDialog) {
         $scope.fields = [];
     }
 
+    $scope.deleteExam = function(index){
+      $scope.examSet.exams.splice(index,1);
+    }
+
     $scope.deleteRange = function(index){
       $scope.exam.ranges.splice(index,1);
     }
 
     $scope.save = function() {
-      
+        
         delete $scope.exam.measureSymbol;
-        delete $scope.exam.titleName;
+        $scope.examSet.exams.push($scope.exam);
+        $scope.exam = {};
+        $scope.exam.ranges = [];
+    };
 
-        if($scope.selectedTitle){
-          $scope.exam.title = $scope.selectedTitle._id;
-        }
-        $scope.exam.active = true;
-        $scope.exams.save($scope.exam).then(
+    $scope.saveSet = function(){
+      delete $scope.examSet.titleName;
+      if($scope.selectedTitle){
+          $scope.examSet.title = $scope.selectedTitle._id;
+      }
+
+      $scope.exams.save($scope.examSet).then(
             function(number){
                 notificationService.showSuccess("Se ha registrado correctamente el examen");
             }, function(error){
@@ -177,9 +184,8 @@ function AddExamCtrl($scope, $meteor, notificationService, exam,$mdDialog) {
                 console.log(error);
             }
         );
-        $scope.exam = '';
-        $mdDialog.hide();
-    };
+      $mdDialog.hide();
+    }
 
     $scope.cancel = function() {
         $mdDialog.cancel();

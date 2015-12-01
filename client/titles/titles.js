@@ -93,7 +93,12 @@ angular.module("sam-1").controller("TitlesListCtrl",['$scope','$meteor','ModalSe
     }]);
 
 function AddTitleController($scope, $meteor, notificationService, title, $mdDialog) {
-    $scope.selectedAnalisys = {};
+    $scope.title = {};
+    $scope.title.active = true;
+    $scope.title.visible = false;
+    $scope.title.selectable = false;
+
+    
     if(title){
       $scope.title = title;
       $scope.selectedAnalisys = $meteor.object(Analisys, $scope.title.analisys);
@@ -121,8 +126,6 @@ function AddTitleController($scope, $meteor, notificationService, title, $mdDial
         //Cleaning data from transform
         delete $scope.title.exams;
         delete $scope.title.analisysObj;
-
-        $scope.title.active = true;
         $scope.titles.save($scope.title).then(function(number) {
             notificationService.showSuccess("Se ha registrado correctamente el titulo");
         }, function(error){

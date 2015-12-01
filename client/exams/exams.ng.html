@@ -25,16 +25,14 @@
               <tbody>
               <tr dir-paginate="exam in exams| itemsPerPage: perPage" class="md-table-content-row" ng-click="show(exam, $event)" total-items="examsCount.count">
 
-                  <td data-title="Nombre">{{ exam.name }}</td>
-                  <td data-title="Medida">{{exam.measureSymbol}}</td>
-                  <td data-title="Titulo">{{exam.titleName.name}}</td>
-                  <td data-title="Rangos">
+                  <td data-title="Elementos">
                     <ul>
-                      <li ng-repeat="range in exam.ranges">
-                        {{range.name|truncate:30}}
+                      <li ng-repeat="e in exam.exams">
+                          {{ e.name }} 
                       </li>
                     </ul>
                   </td>
+                  <td data-title="Titulo">{{exam.titleName.name}}</td>
                   <td data-title="Acciones">
                       <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(exam, $event)">
                           <i class="fa fa-trash"></i>

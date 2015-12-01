@@ -1,4 +1,4 @@
-<md-dialog aria-label="Nuevo examen" class="md-large-thin-dialog">
+<md-dialog aria-label="Nuevo examen" class="md-large-large-dialog">
     <form name="newExamForm" novalidate layout="column">
         <md-toolbar>
             <div class="md-toolbar-tools">
@@ -7,21 +7,18 @@
             </div>
         </md-toolbar>
         <md-dialog-content class="sticky-container">
-          <div layout="column">
-            <div layout="row">
-                <md-input-container flex>
-                    <label>Nombre</label>
-                    <input ng-model="exam.name" required name="name" input-text>
-                    <div ng-messages="newExamForm.name.$error" ng-if="newExamForm.name.$dirty">
-                        <div ng-message="required">*Campo obligatorio</div>
-                        <div ng-message="inputText">*Ingrese solo letras</div>
-                    </div>
-                </md-input-container>
-                <md-select placeholder="Unidad de medida" ng-model="exam.measure" flex>
-                    <md-option ng-repeat="measure in measures" value="{{measure._id}}">{{measure.symbol}}</md-option>
-                </md-select>
-            </div>
-            <md-autocomplete flex required
+          <div layout="row">
+            <md-checkbox ng-model="examSet.visible" aria-label="Checkbox 1">
+                Visible
+            </md-checkbox>
+            <md-checkbox ng-model="examSet.selectable" aria-label="Checkbox 1">
+                Elegible
+            </md-checkbox>
+            <md-checkbox ng-model="examSet.active" aria-label="Checkbox 1">
+                Activo
+            </md-checkbox>
+          </div>
+          <md-autocomplete flex required
                 md-selected-item-change="null"
                   md-search-text-change="null"
                 name="autocompleteField"
@@ -37,20 +34,41 @@
                   <div ng-messages="newExamForm.autocompleteField.$error" ng-if="newExamForm.autocompleteField.$touched">
                     <div ng-message="required"><b>Debe</b> escoger un titulo</div>
                   </div>
-              </md-autocomplete>
+            </md-autocomplete>
+          <md-list flex style="padding:20px;">
+                <md-subheader class="md-no-sticky">Lista de examenes</md-subheader>    
+                    <md-list-item ng-repeat="ex in examSet.exams" class="md-3-line">
+                      <div class="md-list-item-text">
+                          <h3>{{ex.name|truncate:15}}</h3>
+                      </div>
+                        <i class="md-secondary fa fa-trash" ng-click="deleteExam($index)" aria-label="Chat"></i>
+                    </md-list-item>
+          </md-list>
+
+
           <div layout="row">
-            <div layout="column" flex>
-                  <md-input-container>
-                    <label>Rango</label>
-                    <input ng-model="newRange.name" required name="newRangeName" input-text>
-                    <div ng-messages="newExamForm.newRangeName.$error" ng-if="newExamForm.newRangeName.$dirty">
+          <div layout="column">
+            <md-input-container flex>
+                    <label>Nombre</label>
+                    <input ng-model="exam.name" required name="name">
+                    <div ng-messages="newExamForm.name.$error" ng-if="newExamForm.name.$dirty">
                         <div ng-message="required">*Campo obligatorio</div>
                         <div ng-message="inputText">*Ingrese solo letras</div>
                     </div>
-                  </md-input-container>
-                  <md-select placeholder="Tipo de rango" ng-model="selectedType" ng-change="typeChange()">
-                      <md-option ng-repeat="tEva in typeEvaluations" ng-value="tEva">{{tEva.name}}</md-option>
-                  </md-select>
+            </md-input-container>
+            <md-select placeholder="Unidad de medida" ng-model="exam.measure" flex>
+                    <md-option ng-repeat="measure in measures" value="{{measure._id}}">{{measure.symbol}}</md-option>
+            </md-select>
+          </div>
+          <div layout="column" flex>
+                  <div layout="row">
+                    <md-select placeholder="Genero" ng-model="gender">
+                      <md-option ng-repeat="gender in genders" ng-value="gender">{{gender}}</md-option>
+                    </md-select>
+                    <md-select placeholder="Tipo de rango" ng-model="selectedType" ng-change="  typeChange()">
+                        <md-option ng-repeat="tEva in typeEvaluations" ng-value="tEva">{{tEva.name}}</md-option>
+                    </md-select>
+                  </div>
                   <md-input-container ng-repeat="field in selectedType.fields">
                       <label>{{field}}</label>
                       <input ng-model="fields[$index]" required/>
@@ -58,8 +76,7 @@
                   <md-button class="md-primary" ng-click="saveRange()" ng-disabled="newExamForm.newRangeName.$invalid">
                     &ensp;Agregar&ensp;&ensp;<span class="ion-chevron-right"></span>
                   </md-button>
-              </div>   
-              <md-list flex style="padding:20px;">
+                <md-list flex style="padding:20px;">
                 <md-subheader class="md-no-sticky">Lista de rangos</md-subheader>    
                     <md-list-item ng-repeat="range in exam.ranges" class="md-3-line">
                       <div class="md-list-item-text">
@@ -71,12 +88,15 @@
                     </md-list-item>
               </md-list>
           </div>
-          </div>
+        </div>
         </md-dialog-content>
         <div class="md-actions" layout="row">
             <span flex></span>
             <md-button class="md-primary" ng-click="save()" ng-disabled="newExamForm.name.$invalid" type="submit">
                 Guardar
+            </md-button>
+            <md-button class="md-primary" ng-click="saveSet()"  type="submit">
+                Guardar Conjunto
             </md-button>
             <md-button ng-click="cancel()">
                 Cancelar

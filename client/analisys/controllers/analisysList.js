@@ -126,6 +126,10 @@ angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','Modal
     }]);
 
 function AddAnalisysController($scope, $meteor, notificationService, analisys,$mdDialog) {
+    $scope.analisys = {};
+    $scope.analisys.active = true;
+    $scope.analisys.visible = false;
+    $scope.analisys.selectable = false;
     if(analisys){
       $scope.analisys = analisys;
       $scope.selectedLab = $meteor.object(Labs, $scope.analisys.lab);
@@ -155,7 +159,6 @@ function AddAnalisysController($scope, $meteor, notificationService, analisys,$m
         if($scope.selectedLab){
           $scope.analisys.lab = $scope.selectedLab._id;
         }
-        $scope.analisys.active = true;
         $scope.analisysList.save($scope.analisys).then(function(number) {
             notificationService.showSuccess("Se ha registrado correctamente el Analisis clinico");
         }, function(error){

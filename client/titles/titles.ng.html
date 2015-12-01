@@ -32,7 +32,11 @@
                   <td data-title="Examenes">
                     <ul>
                       <li ng-repeat="exam in title.exams">
-                        {{exam.name|truncate:15}}
+                        <ul>
+                          <li ng-repeat="e in exam.exams">
+                            {{e.name|truncate:15}}
+                          </li>
+                        </ul>
                       </li>
                     </ul>
                   </td>

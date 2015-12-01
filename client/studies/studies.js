@@ -222,21 +222,7 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
       }
     }
 
-    $scope.selectAnalisys = function(analisys) {
-        angular.forEach(analisys.titles, function(title) {
-            $scope.selectTitle(title);
-            title.selected = !analisys.selected;
-        });
-    };
-
-    $scope.selectTitle = function(title) {
-        angular.forEach(title.exams, function(exam) {
-            exam.selected = !title.selected;
-        });
-    }
-
-    $scope.save = function() {
-      
+    $scope.save = function() {      
         $scope.study.analisys = [];
         var attentionJson = JSON.parse($scope.selectedAttention);
         $scope.study.attention = attentionJson._id;
@@ -245,33 +231,50 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
         angular.forEach($scope.analisysList, function(analisys)  {
             var component = {};
             component.titles = [];
+            var anaShow = false;
+            var anaBand = false;
+            anaBand = analisys.selectable && (analisys.selected||false);
+            
             angular.forEach(analisys.titles, function(title){
                 var titleComponent = {};
                 titleComponent.exams = [];
-                if(title.selected && !analisys.selected){
-                    analisys.selected = true;
-                };
+                var titleShow = false;
+                var titleBand = title.selectable && (title.selected||false);
                 angular.forEach(title.exams, function(exam){
                   var examComponent = {};
-                  if(exam.selected) {
-                    examComponent.exam = exam._id;
-                    examComponent.historial = [];
+                  var examBand = exam.selectable && (exam.selected||false);
+                  examComponent.exam = exam._id;
+                  examComponent.results = [];
+                  angular.forEach(exam.exams, function(e){
+                    var result = {};
+                    result.historial = [];
+                    examComponent.results.push(result);
+                  });
+                  if(anaBand){
+                    anaShow = true;
+                    titleShow = true;
                     titleComponent.exams.push(examComponent);
-                      if(!title.selected){
-                          title.selected = true;
-                          if(!analisys.selected) {
-                              analisys.selected = true;
-                          }
-                      };
+                  }else{
+                    if(titleBand){
+                      anaShow = true;
+                      titleShow = true;
+                      titleComponent.exams.push(examComponent);
+                    }else{
+                      if(examBand){
+                        anaShow = true;
+                        titleShow = true;
+                        titleComponent.exams.push(examComponent);
+                      }
+                    }
                   }
                 });
-
-                if(title.selected) {
+                if(titleShow) {
                     titleComponent.title = title._id;
                     component.titles.push(titleComponent);
+                    anaShow = true;
                 }
             });
-            if(analisys.selected){
+            if(anaShow){
                 component.analisys = analisys._id;
                 $scope.study.analisys.push(component);
                 $scope.incrementAcordingToLab(analisys.lab);

@@ -1,11 +1,13 @@
 <md-dialog aria-label="Nuevo analisis" layout="column">
     <md-dialog-content class="sticky-container">
+     
         <md-toolbar>
             <div class="md-toolbar-tools">
                 <h2>Analisis</h2>
                 <span flex></span>
             </div>
         </md-toolbar>
+        <div layout="column">
         <form name="newAnalisysForm" novalidate>
           <div layout="column">
             <md-input-container flex>
@@ -38,7 +40,17 @@
                 <div ng-message="required"><b>Debe</b> escoger un laboratorio</div>
               </div>
           </md-autocomplete>
-
+          <div layout="row">
+            <md-checkbox ng-model="analisys.visible" aria-label="Checkbox 1">
+                Visible
+            </md-checkbox>
+            <md-checkbox ng-model="analisys.selectable" aria-label="Checkbox 1">
+                Elegible
+            </md-checkbox>
+            <md-checkbox ng-model="analisys.active" aria-label="Checkbox 1">
+                Activo
+            </md-checkbox>
+          </div>
           </div>
             <div class="md-actions" layout="row">
                 <span flex></span>
@@ -50,5 +62,6 @@
                 </md-button>
             </div>
         </form>
+      </div>
     </md-dialog-content>
 </md-dialog>

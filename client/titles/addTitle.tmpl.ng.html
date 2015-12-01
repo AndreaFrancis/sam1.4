@@ -32,6 +32,17 @@
                 <div ng-message="required"><b>Debe</b> escoger un analisis</div>
               </div>
           </md-autocomplete>
+          <div layout="row">
+            <md-checkbox ng-model="title.visible" aria-label="Checkbox 1">
+                Visible
+            </md-checkbox>
+            <md-checkbox ng-model="title.selectable" aria-label="Checkbox 1">
+                Elegible
+            </md-checkbox>
+            <md-checkbox ng-model="title.active" aria-label="Checkbox 1">
+                Activo
+            </md-checkbox>
+          </div>
             <div class="md-actions" layout="row">
                 <span flex></span>
                 <md-button class="md-primary" ng-click="save()" ng-disabled="titleForm.$invalid" type="submit">
