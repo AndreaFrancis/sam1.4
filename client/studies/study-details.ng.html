@@ -134,7 +134,7 @@
   </div>
   <md-input-container class="md-block">
               <label>Observaciones</label>
-              <textarea ng-model="study.obs" columns="1" rows="5"></textarea>
+              <textarea ng-model="study.obs" columns="1" rows="3"></textarea>
   </md-input-container>
   <md-button type="button"  class="md-icon-button" flex ng-disabled="newStudyForm.$invalid" aria-label="Guardar" ng-click="saveStudy($event)" ng-if="isBioquimic">
       <i class="fa fa-save"></i>
@@ -188,7 +188,7 @@
                                             <td data-title="Resultado">
                                                 <md-input-container>
                                                   <label></label>
-                                                  <input ng-model="e.result"  name="result" ng-keyup="$event.keyCode == 13 && save(exam,$index,$parent.$index,$parent.$parent.$index)">
+                                                  <input ng-model="e.result"  name="result" ng-keyup="$event.keyCode == 13 && save(e,$index,$parent.$index,$parent.$parent.$index, $parent.$parent.$parent.$index)">
                                                 </md-input-container>
                                             </td>
                                             <td data-title="U. Med">
@@ -197,7 +197,7 @@
                                             <td data-title="Examen">
                                               <ul>
                                                 <li ng-repeat="range in e.ranges()">
-                                                <p>{{range.name}} - {{range.typeName}}
+                                                <p>{{range.gender}} : {{range.typeName}}
                                               <span ng-repeat="field in range.fields">{{field.name}}: {{field.value}}&ensp;</span>
                                                 {{e.symbol()}}
                                             </p>

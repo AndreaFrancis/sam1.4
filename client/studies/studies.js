@@ -137,7 +137,8 @@ function AddStudyController($scope, $meteor, notificationService, $stateParams, 
     });
     
     if($scope.isDoctor){
-      var doctor = Doctors.findOne({userId: localStorage.getItem("user")});
+      var userId = localStorage.getItem("user");
+      var doctor = Doctors.findOne({userId: userId});
       if(doctor){
         $scope.selectedDoctor = doctor;
       }

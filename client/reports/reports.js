@@ -364,25 +364,37 @@ var saveAs = saveAs || (function(view) {
       }
 
 
-      $scope.createProcedenceReport = function(initialDate, endDate, attention, service){
-          var query = [{"creationDate": {"$gte": initialDate, "$lte": endDate}}];
+      $scope.createProcedenceReport = function(initialDate, endDate, attention, service, gender){
+          $scope.initialDate = initialDate;
+          $scope.endDate = endDate;
+          var genderPatients = $meteor.collection(function(){
+            return Patients.find({"gender":gender});
+          },false);
+          var patientIds = [];
+          angular.forEach(genderPatients, function(patient){
+            patientIds.push(patient._id);
+          });
+          $scope.nroResultsPatient = genderPatients.length;
+
+          var query = [{"creationDate": {"$gte": initialDate, "$lte": endDate}},{"patient":{$in:patientIds}}];
           if(attention != $scope.selectors.ALL){
           	query.push({"attention":attention._id});
           }
           if(service != $scope.selectors.ALL){
           	query.push({"service":service._id});	
           }
-          $scope.results =  Studies.find(
-              {$and:query}
+        $scope.results = Studies.find(
+            {$and:query}
               ,{
-              	transform: transformFunction,
+                transform: transformFunction,
             	sort: {creationDate:1}
-            }).fetch();
-			$scope.nroResults = $scope.results.length;
+              }).fetch();
+        	$scope.nroResults = $scope.results.length;
       }
 
 
       $scope.createDiscriminated = function(pInitialDate,pEndDate){
+      	//Creating keys
       	$scope.keys = {};
       	angular.forEach($scope.attentions, function(attention){
         	var detail = {};
@@ -391,7 +403,7 @@ var saveAs = saveAs || (function(view) {
         	});
         	$scope.keys[attention._id] = detail;
       	});
-
+      	//Creating template
         $scope.template = {};
         var analisysList = $meteor.collection(Analisys,false);
         angular.forEach(analisysList, function(analisys){
@@ -401,11 +413,11 @@ var saveAs = saveAs || (function(view) {
             var exams = {};
             var examsP = Exams.find({title:title._id}).fetch();
             angular.forEach(examsP, function(exam){
-                exams[exam._id] = {name:exam.name, result: JSON.parse(JSON.stringify($scope.keys))}
+                exams[exam._id] = {name:"Ej",select:exam.selectable,exams:exam.exams,visible:exam.visible, result: JSON.parse(JSON.stringify($scope.keys))};
             });
-            titles[title._id] = {name: title.name, exams:exams};
+            titles[title._id] = {name: title.name,select:title.selectable,visible:title.visible, exams:exams, result: JSON.parse(JSON.stringify($scope.keys))};
           });
-          $scope.template[analisys._id] = {name: analisys.name, titles:titles, result: JSON.parse(JSON.stringify($scope.keys))};
+          $scope.template[analisys._id] = {name: analisys.name,select:analisys.selectable, titles:titles, result: JSON.parse(JSON.stringify($scope.keys))};
         });
 
         angular.forEach($scope.keys, function(servicesArray,attentionKey){
@@ -416,25 +428,57 @@ var saveAs = saveAs || (function(view) {
                   ,
                    {"attention":attentionKey}
                   ,
-                  {"service": serviceKey}
+                  {"service": serviceKey},
+                  { "dailyCode": { $exists: true } },
+            	  { "dailyCode": {$ne:null} }
               ]}).fetch();
+            var evaluateSumAnalisys = false;
+            var evaluateSumTitle = false;
+            var evaluateSumExam = false;
             angular.forEach(resultsByAttentionAndSer, function(studyRes){
               angular.forEach(studyRes.analisys, function(analisys){
                 var analisysCode = analisys.analisys;
-                angular.forEach(analisys.titles, function(title){
-                  var titleCode = title.title;
-                  angular.forEach(title.exams, function(exam){
-                    var examCode = exam.exam;
-                    $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
-                    $scope.template[analisysCode].titles[titleCode].exams[examCode].result[attentionKey][serviceKey]+=1;
-                  });
-                });
+                evaluateSumAnalisys = $scope.evaluateAnalisys(analisysCode,attentionKey,serviceKey);
+                if(!evaluateSumAnalisys){
+                	angular.forEach(analisys.titles, function(title){
+                  		var titleCode = title.title;
+                  		evaluateSumTitle = $scope.evaluateTitle(analisysCode, titleCode,attentionKey,serviceKey);
+                  		if(!evaluateSumTitle){
+                  			angular.forEach(title.exams, function(exam){
+                    			var examCode = exam.exam;
+								$scope.evaluateExam(analisysCode, titleCode,examCode,attentionKey,serviceKey);
+                  			});
+                  		}
+                	});
+                }                
               });
             });
           });
         });
       }
 
+      $scope.evaluateAnalisys = function(analisysCode,attentionKey,serviceKey){
+      	var selectable = $scope.template[analisysCode].select;
+      	if(selectable){
+      		 $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+      	}
+      	return selectable;
+      }
+
+	  $scope.evaluateTitle = function(analisysCode,titleCode, attentionKey, serviceKey){
+	  	var selectable = $scope.template[analisysCode].titles[titleCode].select;
+      	if(selectable){
+      		 $scope.template[analisysCode].titles[titleCode].result[attentionKey][serviceKey]+=1;
+      		 $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+      	}
+      	return selectable;
+      }
+
+	  $scope.evaluateExam = function(analisysCode, titleCode,examCode,attentionKey,serviceKey){
+	    $scope.template[analisysCode].titles[titleCode].exams[examCode].result[attentionKey][serviceKey]+=1;
+	    $scope.template[analisysCode].titles[titleCode].result[attentionKey][serviceKey]+=1;
+	    $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+      }      
       $scope.exportExcel = function () {
        var blob = new Blob([document.getElementById('exportable').innerHTML], {
            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"

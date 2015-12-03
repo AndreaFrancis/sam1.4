@@ -168,7 +168,7 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
           found = true;
           var equalValue = range.fields[i].value;
           if(equalValue == val){
-            detail.result = range.name;
+            detail.result = "Dentro de rango";
             detail.correct = true;
           }
         }
@@ -186,7 +186,7 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
           found = true;
           var equalValue = range.fields[i].value;
           if(equalValue < val){
-            detail.result = range.name;
+            detail.result = "Dentro de rango";
             detail.correct = true;
           }
         }
@@ -204,7 +204,7 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
           found = true;
           var equalValue = range.fields[i].value;
           if(equalValue > val){
-            detail.result = range.name;
+            detail.result = "Dentro de rango";
             detail.correct = true;
           }
         }
@@ -240,7 +240,7 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
     var final = parseInt(final);
     if(initial != undefined && final!= undefined){
         if((val<=final) && (val>=initial)){
-          detail.result = range.name;
+          detail.result = "Dentro de rango";
           detail.correct = true;
         }
     }
@@ -248,12 +248,21 @@ angular.module('sam-1').service("RangeEvaluator", function(RANGE_EVALUATOR, $met
     return detail;
     }
 
+    var existEval = function(val, range){
+      var detail = {result:"Fuera de rango", correct:false};
+      if(val!=null&& val!=""&&val!=undefined){
+        detail.result = "Dentro de rango";
+        detail.correct = true;
+      }
+      return detail;
+    }
 
     this.evaluatorsMap = {};
     this.evaluatorsMap['Igual'] = equalEval;
     this.evaluatorsMap['Entre'] = betweenEval;
     this.evaluatorsMap['Mayor'] = majorEval;
     this.evaluatorsMap['Menor'] = minorEval;
+    this.evaluatorsMap['Existe'] = existEval;
 });
 
 

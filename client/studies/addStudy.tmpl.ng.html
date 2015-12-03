@@ -122,22 +122,16 @@
           <ul>
             <li ng-repeat="analisys in analisysList">
                    <input type="checkbox" ng-if="analisys.selectable" ng-model="analisys.selected" />
-                   <!--md-checkbox ng-if="analisys.selectable" ng-model="analisys.selected" aria-label="Checkbox 1" ng-click="selectAnalisys(analisys)">
-                   </md-checkbox-->
                    <span ng-if="analisys.visible">{{analisys.name}}</span>
                     <span></span>
                      <ul>
                          <li ng-repeat="title in analisys.titles">
                              <input type="checkbox" ng-if="title.selectable" ng-model="title.selected" />
-                             <!--md-checkbox ng-if="title.selectable" ng-model="title.selected" aria-label="Checkbox 1" ng-click="selectTitle(title)">
-                             </md-checkbox-->
                              <span ng-if="title.visible">{{title.name}}</span>
                              <span></span>
                              <ul>
                                  <li ng-repeat="exam in title.exams">
                                   <input type="checkbox" ng-if="exam.selectable" ng-model="exam.selected"/>
-                                     <!--md-checkbox ng-if="exam.selectable" ng-model="exam.selected" aria-label="Checkbox 1">
-                                     </md-checkbox-->
                                      <ul ng-if="exam.visible">
                                         <li ng-repeat="e in exam.exams">
                                           <span >{{e.name}}</span>

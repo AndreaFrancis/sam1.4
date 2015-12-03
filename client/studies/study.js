@@ -97,16 +97,15 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                               return measure.symbol;
                             }
                           }
+                          if(real.ranges){
+                            angular.forEach(real.ranges, function(range){
+                              var typeName = $meteor.object(TypeEvaluation, range.type,false);
+                              range.typeName = typeName.name;
+                            });
+                          }
                           e.ranges = function(){
                             return real.ranges;
                           }
-                          if(real.ranges){
-                            angular.forEach(e.ranges(), function(range){
-                              range.typeName = function(){
-                                return $meteor.object(TypeEvaluation, range.type,false).name;
-                              }
-                            });
-                        }
                       }
                       i++;
                     });
@@ -115,10 +114,6 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
         });
 
         }
-        
-        //$scope.bioquimic = {};
-
-        //$scope.bioquimics = Users.find({"profile.mainRol": "Bioquimico"}).fetch();
 
         $scope.saveStudy = function(event){
           delete $scope.study.patientObj;
@@ -144,39 +139,44 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
             $state.go('studies');
         }
 
-        $scope.save = function(exam,examIndex,titleIndex, analisysIndex) {
+        $scope.save = function(e,resultIndex,examIndex,titleIndex, analisysIndex) {
+          var examFromAnalisys = $scope.study.analisys[analisysIndex].titles[titleIndex].exams[examIndex].results[resultIndex];
+          examFromAnalisys.result = e.result;
+          var detail = "";
+          var ranges = e.ranges();
+          var patientGender = $scope.study.patientObj.gender|| "A";
+          var genderRange = _.where(ranges, {gender: patientGender});
+          if(genderRange < 1){
+            genderRange = _.where(ranges, {gender: "A"});
+          }
+          if(genderRange.length>0){
+            genderRange = genderRange[0];
+          }
+          var keyEvaluation = $meteor.object(TypeEvaluation, genderRange.type).name;
+          var evaluator = RangeEvaluator.evaluatorsMap[keyEvaluation];
+          if(evaluator){
+                var detail = evaluator(e.result, genderRange);
+                e.detail = detail.result;
+                examFromAnalisys.detail = detail.result;
+                e.state = detail.correct;
+                examFromAnalisys.state = detail.correct;
+          }
+          
 
+
+          //Historial
+          var userAsigned = localStorage.getItem("user"); //Change if is a secretary
+          var partialRecord = {};
+          partialRecord.value = e.result;
+          partialRecord.user = userAsigned;
+          partialRecord.date = new Date();
+          
           delete $scope.study.patientObj;
           delete $scope.study.doctorObj;
           delete $scope.study.creatorName;
           delete $scope.study.serviceName;
           delete $scope.study.attentionName;
           delete $scope.study._serverBackup;
-
-          var examFromAnalisys = $scope.study.analisys[analisysIndex].titles[titleIndex].exams[examIndex];
-          examFromAnalisys.result = exam.result;
-          var detail = "";
-          var ranges = exam.ranges();
-
-          angular.forEach(ranges,function(range){
-              var typeEvaluation = $meteor.object(TypeEvaluation, range.type, false);
-              var keyEvaluation = typeEvaluation.name;
-              var evaluator = RangeEvaluator.evaluatorsMap[keyEvaluation];
-              if(evaluator){
-                var detail = evaluator(exam.result, range);
-                exam.detail = detail.result;
-                examFromAnalisys.detail = detail.result;
-                exam.state = detail.correct;
-                examFromAnalisys.state = detail.correct;
-              }
-          });
-          //Historial
-          var userAsigned = localStorage.getItem("user"); //Change if is a secretary
-          var partialRecord = {};
-          partialRecord.value = exam.result;
-          partialRecord.user = userAsigned;
-          partialRecord.date = new Date();
-          //exam.historial.push(partialRecord);
           examFromAnalisys.historial.push(partialRecord);
           $scope.study.save()
           .then(function(number) {
@@ -202,7 +202,9 @@ angular.module("sam-1").controller("StudyCtrl", ['$scope', '$stateParams','$mete
                       "</style>";
           newWin.document.write("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>"+style+"</head><body>");
           newWin.document.write("<h2>Instituto de Gastroenterología Boliviano Japonés</h2>");
-          newWin.document.write("<b>Doctor (a): </b>"+$scope.study.doctorObj.lastName+" "+$scope.study.doctorObj.name+"<br>");
+          newWin.document.write("<h2>"+$scope.study.dailyCode+"</h2>");
+          newWin.document.write("<b>Recibo/Factura: </b>"+$scope.study.bill+"<br>");
+          newWin.document.write("<b>Médico (a): </b>"+$scope.study.doctorObj.lastName+" "+$scope.study.doctorObj.name+"<br>");
           newWin.document.write("<b>Paciente: </b>"+$scope.study.patientObj.lastName+" "+
           $scope.study.patientObj.lastNameMother+" "+$scope.study.patientObj.name+"<br>");
           newWin.document.write("<b>Tipo de paciente: </b>"+$scope.selectedAttention.name+"<br>");
@@ -293,7 +295,6 @@ function PrintResultController($scope,$mdDialog, study,analisysList, $meteor, Pr
           angular.forEach(title.exams, function(exam) {
             exam.selected = !title.selected;
           });
-          analisys.selected = true;
         }
 
         $scope.selectExam = function(exam, title, analisys){
@@ -337,7 +338,7 @@ function PrintResultController($scope,$mdDialog, study,analisysList, $meteor, Pr
           newWin.document.write("<hr>");
           newWin.document.write("<b>Paciente: </b>"+$scope.study.patientObj.lastName+" "+
           $scope.study.patientObj.lastNameMother+" "+$scope.study.patientObj.name+"<br>");
-          newWin.document.write("<b>Doctor: </b>"+$scope.study.doctorObj.lastName+" "+$scope.study.doctorObj.name+"<br>");
+          newWin.document.write("<b>Médico: </b>"+$scope.study.doctorObj.lastName+" "+$scope.study.doctorObj.name+"<br>");
           var gender = $scope.study.patientObj.gender == "F"? "Femenino": "Masculino";
           newWin.document.write("<b>Sexo: </b>"+gender+"<br>");
           if(!!$scope.study.patientObj.birthdate){
@@ -360,30 +361,54 @@ function PrintResultController($scope,$mdDialog, study,analisysList, $meteor, Pr
                     if(title.selected){
                         newWin.document.write("<b>"+title.name()+"<b><br/>");
                         newWin.document.write("<table>");
-                        newWin.document.write("<tr><th>Examen</th><th>Resultado</th><th>U. Med</th><th>Referencia</th><th>Detalle</th></tr>");
+                        newWin.document.write("<tr><th>Examen</th><th>Dentro de rango</th><th>Fuera de rango</th><th>Referencia</th></tr>");
                         angular.forEach(title.exams, function(exam){
                           if(exam.selected){
-                              newWin.document.write("<tr>");
-                              newWin.document.write("<td>"+exam.name()+"</td>");
-                            newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.result)+"</td>");
-                            if(exam.symbol){
-                              newWin.document.write("<td>"+exam.symbol()+"</td>");
-                            }else{
-                              newWin.document.write("<td></td>");
-                            }
-                            if(exam.ranges()){
-                              newWin.document.write("<td>");
-                              angular.forEach(exam.ranges(), function(range){
-                              var rangeText = range.name+" - "+range.typeName()+" ";
-                              angular.forEach(range.fields, function(field){
-                                rangeText+= field.name+": "+field.value+" ";
+                              angular.forEach(exam.results, function(e){
+                                  newWin.document.write("<tr>");
+                                  newWin.document.write("<td>"+e.name()+"</td>");
+                                  if(e.state){
+                                    newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(e.result));
+                                    if(e.symbol){
+                                      newWin.document.write(" "+e.symbol()+"</td>");
+                                    }else{
+                                      newWin.document.write("</td>");
+                                    }  
+                                    newWin.document.write("<td></td>");
+                                  }else{
+                                    newWin.document.write("<td></td>");
+                                    newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(e.result));
+                                    if(e.symbol){
+                                      newWin.document.write(" "+e.symbol()+"</td>");
+                                    }else{
+                                      newWin.document.write("</td>");
+                                    }  
+                                  }
+
+                                  
+
+
+                                  if(e.ranges()){
+                                  newWin.document.write("<td>");
+                                  angular.forEach(e.ranges(), function(range){
+                                    var rangeText = range.gender=="A"? "":range.gender+":";
+                                    var i = 0;
+                                    angular.forEach(range.fields, function(field){
+                                      rangeText+= field.value;
+                                      if(i<(range.fields.length-1)){
+                                        rangeText+=" - ";
+                                      }
+                                      i++;
+                                    });
+                                    if(e.symbol){
+                                      rangeText+=" "+e.symbol();
+                                    }
+                                    newWin.document.write("<p>"+rangeText+"</p>");
+                                  });
+                                  newWin.document.write("</td>");
+                                }                    
+                                newWin.document.write("</tr>");
                               });
-                              newWin.document.write("<p>"+rangeText+"</p>");
-                              });
-                              newWin.document.write("</td>");
-                            }                    
-                            newWin.document.write("<td>"+TextEvaluatorService.getTextEvenIfNullOrUndef(exam.detail)+"</td>");
-                            newWin.document.write("</tr>");
                           }
                         });
                         newWin.document.write("</table>");
@@ -392,6 +417,7 @@ function PrintResultController($scope,$mdDialog, study,analisysList, $meteor, Pr
                   });
               }
           });
+          newWin.document.write("<b>Observaciones: </b></br>"+$scope.study.obs);
           newWin.document.write("</body></html>");
           newWin.print();
           newWin.close();          

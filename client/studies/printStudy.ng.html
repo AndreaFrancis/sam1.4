@@ -21,9 +21,13 @@
                              <span></span>
                              <ul>
                                  <li ng-repeat="exam in title.exams">
-                                     <md-checkbox ng-model="exam.selected" aria-label="Checkbox 1" ng-click="selectExam(exam, title, analisys)">
-                                     {{exam.name()}}
-                                     </md-checkbox>
+                                  <md-checkbox  ng-model="exam.selected" ng-click="selectExam(exam, title, analisys)">
+                                  </md-checkbox>
+                                     <ul>
+                                        <li ng-repeat="e in exam.results">
+                                          <span >{{e.name()}}</span>
+                                        </li>
+                                     </ul>
                                  </li>
                              </ul>
                          </li>
