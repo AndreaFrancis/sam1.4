@@ -4,14 +4,13 @@
   <md-whiteframe class="md-whiteframe-z1" layout="column">
         <md-content class="md-padding" id="general">
           <div layout="row">
-            <md-input-container flex>
+            <md-input-container flex ng-if="isBioquimic">
               <label>Nro. Factura</label>
               <input ng-model="study.bill"  name="bill" input-numeric ng-keyup="$event.keyCode == 13 && searchBill($event)">
               <div ng-messages="newStudyForm.bill.$error" ng-if="newStudyForm.bill.$dirty">
                       <div ng-message="inputNumeric">*Ingrese solo numeros</div>
               </div>
             </md-input-container>
-            <md-progress-circular  md-diameter="20" md-mode="{{waiting}}"></md-progress-circular>
             <md-input-container flex ng-if="isBioquimic">
               <label>Codigo</label>
               <input ng-model="study.dailyCode"  name="dailyCode" daily-study date="{{creationDate.toString()}}">
@@ -121,10 +120,41 @@
         <md-content class="md-padding" id="analisis">
           <ul>
             <li ng-repeat="analisys in analisysList">
-                   <input type="checkbox" ng-if="analisys.selectable" ng-model="analisys.selected" />
-                   <span ng-if="analisys.visible">{{analisys.name}}</span>
-                    <span></span>
-                     <ul>
+                   
+                  <md-toolbar md-scroll-shrink ng-if="analisys.visible">
+                    <div class="md-toolbar-tools">
+                      <!--input type="checkbox" ng-if="analisys.selectable" ng-model="analisys.selected" /-->
+                       <md-checkbox ng-if="analisys.selectable" ng-model="analisys.selected" >
+                       </md-checkbox>
+                      <span ng-if="analisys.visible">{{analisys.name}}</span>
+                    </div>
+                  </md-toolbar>
+
+
+                   <!--input type="checkbox" ng-if="analisys.selectable" ng-model="analisys.selected" />
+                   <span ng-if="analisys.visible">{{analisys.name}}</span-->
+<md-list ng-cloak>
+  <md-list-item ng-repeat="title in analisys.titles" ng-if="title.visible">
+    <md-checkbox ng-if="title.selectable" ng-model="title.selected"></md-checkbox>
+    <p>{{title.name}}</p>
+    <br><br>
+    <md-list ng-cloak>
+      <md-list-item ng-repeat="exam in title.exams" ng-if="exam.visible">
+        <md-checkbox ng-if="exam.selectable" ng-model="exam.selected"></md-checkbox>
+                                  <!--input type="checkbox" ng-if="exam.selectable" ng-model="exam.selected"/-->
+                                     <ul ng-if="exam.visible">
+                                        <li ng-repeat="e in exam.exams">
+                                          <span >{{e.name}}</span>
+                                        </li>
+                                     </ul>
+                                     <md-divider ng-hide="$last"></md-divider>
+      </md-list-item>
+    </md-list>
+    <md-divider ng-hide="$last"></md-divider>
+  </md-list-item>
+</md-list>
+
+                     <!--ul>
                          <li ng-repeat="title in analisys.titles">
                              <input type="checkbox" ng-if="title.selectable" ng-model="title.selected" />
                              <span ng-if="title.visible">{{title.name}}</span>
@@ -140,7 +170,7 @@
                                  </li>
                              </ul>
                          </li>
-                     </ul>
+                     </ul-->
               </li>
           </ul>
         </md-content>
