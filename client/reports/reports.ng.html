@@ -70,6 +70,7 @@
                   </div>
           </md-content>
       </md-tab>
+
       <md-tab label="Procedencia">
         <md-content class="md-padding" id="procedence">
           <div layout="row">
@@ -369,6 +370,64 @@
                                   </table>
                                 </td>
                               </tr>
+                              </tbody>
+                          </table>
+                        </div>
+                  </div>
+            </div>
+            <div class="sub-content">
+              <h2>Resumen estadistico</h2>
+              <md-button class="md-fab md-primary" ng-click="exportResume()" aria-label="Print Resume">
+                        <i class="fa fa-print"></i>
+              </md-button>
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+                          <div id="resume">
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                <th> Analisis</th>
+                                <th> Cantidad</th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                                <tr ng-repeat-start="a in areas"  class="analisysHeader">
+                                  <td><b> {{a.name}}</b></td>
+                                  <td><b> {{a.counter}}</b></td>
+                                </tr>
+                                <tr ng-repeat-end ng-repeat="an in a.analisysList">
+                                  <td> {{an.name}}</td>
+                                  <td> {{template[an._id].counter}}</td>
+                                </tr>
+                              </tbody>
+                          </table>
+                        </div>
+                  </div>
+            </div>
+            <div class="sub-content">
+              <h2>Resumen de actividades de diagnostico</h2>
+              <md-button class="md-fab md-primary" ng-click="exportDiagnostic()" aria-label="Print Resume">
+                        <i class="fa fa-print"></i>
+              </md-button>
+                      <div class="table-responsive-vertical shadow-z-1 center-table">
+                          <div id="diagnostics">
+                          <table id="table" class="table table-hover table-mc-light-blue">
+                              <thead>
+                              <tr>
+                                <th> Servicios</th>
+                                <th ng-repeat="a in areas" align="center">
+                                  {{a.name}}
+                                </th>
+                              </tr>
+                              </thead>
+                              <tbody>
+                                <tr ng-repeat-start="at in attentions">
+                                </tr>
+                                <tr ng-repeat-end ng-repeat="ser in services">
+                                  <td> {{at.name}}. {{ser.name}}</td>
+                                  <td ng-repeat="ar in areas"> 
+                                    {{ar.result[at._id][ser._id]}}
+                                  </td>
+                                </tr>
                               </tbody>
                           </table>
                         </div>

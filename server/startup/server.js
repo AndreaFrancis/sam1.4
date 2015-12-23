@@ -1,3 +1,4 @@
+Areas = new Mongo.Collection("Areas");
 Analisys = new Mongo.Collection("Analisys");
 Answers = new Mongo.Collection("Answers");
 Attentions = new Mongo.Collection("Attentions");

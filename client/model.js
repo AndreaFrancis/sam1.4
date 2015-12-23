@@ -1,3 +1,5 @@
+Areas = new Mongo.Collection("Areas");
+
 Analisys = new Mongo.Collection("Analisys");
 //Ground.Collection(Analisys,'analisys');
 

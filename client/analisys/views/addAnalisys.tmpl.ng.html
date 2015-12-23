@@ -40,6 +40,25 @@
                 <div ng-message="required"><b>Debe</b> escoger un laboratorio</div>
               </div>
           </md-autocomplete>
+
+          <md-autocomplete flex required
+            md-selected-item-change="null"
+              md-search-text-change="null"
+            md-input-name="autocompleteFieldArea"
+            md-no-cache="true"
+            md-selected-item="selectedArea"
+            md-search-text="searchTextArea"
+            md-items="item in querySearchArea(searchTextArea)"
+            md-item-text="item.name"
+            md-floating-label="Area">
+              <md-item-template>
+                <span md-highlight-text="searchTextArea">{{item.name}}</span>
+              </md-item-template>
+              <div ng-messages="newAnalisysForm.autocompleteFieldArea.$error" ng-if="newAnalisysForm.autocompleteFieldArea.$touched">
+                <div ng-message="required"><b>Debe</b> escoger un area</div>
+              </div>
+          </md-autocomplete>
+
           <div layout="row">
             <md-checkbox ng-model="analisys.visible" aria-label="Checkbox 1">
                 Visible

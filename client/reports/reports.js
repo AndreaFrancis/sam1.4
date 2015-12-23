@@ -403,6 +403,19 @@ var saveAs = saveAs || (function(view) {
         	});
         	$scope.keys[attention._id] = detail;
       	});
+
+      	//Areas
+      	$scope.areas = Areas.find({},{transform:function(doc){
+      		var analisys = Analisys.find({area:doc._id}).fetch();
+      		if(analisys){
+      			doc.analisysList = analisys;
+      		}
+      		return doc;
+      	}}).fetch();
+      	angular.forEach($scope.areas, function(area){
+      		area.counter = 0;
+      		area.result= JSON.parse(JSON.stringify($scope.keys));
+      	});
       	//Creating template
         $scope.template = {};
         var analisysList = $meteor.collection(Analisys,false);
@@ -417,7 +430,7 @@ var saveAs = saveAs || (function(view) {
             });
             titles[title._id] = {name: title.name,select:title.selectable,visible:title.visible, exams:exams, result: JSON.parse(JSON.stringify($scope.keys))};
           });
-          $scope.template[analisys._id] = {name: analisys.name,select:analisys.selectable, titles:titles, result: JSON.parse(JSON.stringify($scope.keys))};
+          $scope.template[analisys._id] = {counter:0,name: analisys.name,select:analisys.selectable, titles:titles, result: JSON.parse(JSON.stringify($scope.keys))};
         });
 
         angular.forEach($scope.keys, function(servicesArray,attentionKey){
@@ -461,6 +474,11 @@ var saveAs = saveAs || (function(view) {
       	var selectable = $scope.template[analisysCode].select;
       	if(selectable){
       		 $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+      		 $scope.template[analisysCode].counter+=1;
+      		 var a = $meteor.object(Analisys, analisysCode);
+      		 var area = _.find($scope.areas, function(doc){ return doc._id==a.area; });
+      		 area.result[attentionKey][serviceKey]+=1;
+      		 area.counter+= 1;
       	}
       	return selectable;
       }
@@ -470,6 +488,11 @@ var saveAs = saveAs || (function(view) {
       	if(selectable){
       		 $scope.template[analisysCode].titles[titleCode].result[attentionKey][serviceKey]+=1;
       		 $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+      		 $scope.template[analisysCode].counter+=1;
+      		 var a = $meteor.object(Analisys, analisysCode);
+      		 var area = _.find($scope.areas, function(doc){ return doc._id==a.area; });
+      		 area.result[attentionKey][serviceKey]+=1;
+      		 area.counter+= 1;
       	}
       	return selectable;
       }
@@ -478,12 +501,31 @@ var saveAs = saveAs || (function(view) {
 	    $scope.template[analisysCode].titles[titleCode].exams[examCode].result[attentionKey][serviceKey]+=1;
 	    $scope.template[analisysCode].titles[titleCode].result[attentionKey][serviceKey]+=1;
 	    $scope.template[analisysCode].result[attentionKey][serviceKey]+=1;
+	    $scope.template[analisysCode].counter+=1;
+	    var a = $meteor.object(Analisys, analisysCode);
+      	var area = _.find($scope.areas, function(doc){ return doc._id==a.area; });
+      	area.result[attentionKey][serviceKey]+=1;
+      	area.counter+= 1;
       }      
       $scope.exportExcel = function () {
        var blob = new Blob([document.getElementById('exportable').innerHTML], {
            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
        });
        saveAs(blob, "Discriminado.xls");
+     };
+
+     $scope.exportResume = function () {
+       var blob = new Blob([document.getElementById('resume').innerHTML], {
+           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+       });
+       saveAs(blob, "ResumenEstadistico.xls");
+     };
+	
+	 $scope.exportDiagnostic = function () {
+       var blob = new Blob([document.getElementById('diagnostics').innerHTML], {
+           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+       });
+       saveAs(blob, "ResumenDiagnostico.xls");
      };
 
       $scope.printReport = function(){

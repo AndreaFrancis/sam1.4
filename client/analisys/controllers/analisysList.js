@@ -8,7 +8,7 @@ angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','Modal
         $scope.sort = {name: 1};
         var userRol = localStorage.getItem("rolName");
         $scope.isAdmin = userRol=="Admin";
-        $scope.headers = ['Nombre','Titulos','Lab','Descripcion','Acciones'];
+        $scope.headers = ['Nombre','Titulos','Lab','Area','Descripcion','Acciones'];
         Meteor.subscribe('counters', function() {
           $scope.analisysCount = $meteor.object(Counts ,'analisys', false);
         });
@@ -21,6 +21,11 @@ angular.module("sam-1").controller("AnalisysListCtrl",['$scope','$meteor','Modal
                 var obj = $meteor.object(Labs,doc.lab);
                 if(obj){
                  doc.labObj = obj.name;
+                }
+
+                var area = $meteor.object(Areas,doc.area);
+                if(area){
+                 doc.areaObj = area.name;
                 }
               return doc;
             },
@@ -133,12 +138,19 @@ function AddAnalisysController($scope, $meteor, notificationService, analisys,$m
     if(analisys){
       $scope.analisys = analisys;
       $scope.selectedLab = $meteor.object(Labs, $scope.analisys.lab);
+      $scope.selectedArea = $meteor.object(Areas, $scope.analisys.area);
     }
 
     $scope.analisysList = $meteor.collection(Analisys, false);
     $scope.labs = $meteor.collection(Labs, false);
+    $scope.areas = $meteor.collection(Areas, false);
     $scope.querySearch  = function(query) {
       var results = query ? $scope.labs.filter( createFilterFor(query) ) : [];
+      return results;
+    }
+
+    $scope.querySearchArea  = function(query) {
+      var results = query ? $scope.areas.filter( createFilterForArea(query) ) : [];
       return results;
     }
 
@@ -150,14 +162,26 @@ function AddAnalisysController($scope, $meteor, notificationService, analisys,$m
      };
     }
 
+    function createFilterForArea(query) {
+     var lowercaseQuery = angular.lowercase(query);
+     return function filterFn(areaEl) {
+       var nameToLoweCase = angular.lowercase(areaEl.name);
+       return (nameToLoweCase.indexOf(lowercaseQuery) >= 0);
+     };
+    }
+
 
     $scope.save = function() {
         //Cleaning data from transform
         delete $scope.analisys.titles;
         delete $scope.analisys.labObj;
+        delete $scope.analisys.areaObj;
 
         if($scope.selectedLab){
           $scope.analisys.lab = $scope.selectedLab._id;
+        }
+        if($scope.selectedArea){
+          $scope.analisys.area = $scope.selectedArea._id;
         }
         $scope.analisysList.save($scope.analisys).then(function(number) {
             notificationService.showSuccess("Se ha registrado correctamente el Analisis clinico");

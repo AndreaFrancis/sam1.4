@@ -40,6 +40,7 @@
                     </ul>
                   </td>
                   <td data-title="Laboratorio">{{ analisys.labObj }}</td>
+                  <td data-title="Area">{{ analisys.areaObj }}</td>
                   <td data-title="Descripcion">{{analisys.description}}</td>
                   <td data-title="Acciones">
                       <md-button class="md-icon-button" flex  aria-label="Borrar" ng-click="delete(analisys,$event)">
@@ -70,11 +71,16 @@
       <div class="col-lg-12">
             <div ng-repeat="analisys in catalog">
                   <h3><span>{{analisys.name}}</span></h3>
-                  <div ng-repeat="title in analisys.titles">
+                  <div ng-repeat="title in analisys.titles" ng-if="analisys.active">
                           <md-subheader class="md-primary">{{title.name}}</md-subheader>
-                              <li class="md-table-content-row" ng-repeat="exam in title.exams">
-                                    {{exam.name}}
-                              </li>
+
+                              <div class="md-table-content-row" ng-repeat="exam in title.exams" ng-if="title.active">
+                                    <ul ng-if="exam.active">
+                                        <li ng-repeat="e in exam.exams">
+                                          <span >* {{e.name}}</span>
+                                        </li>
+                                    </ul>
+                              </div>
                   </div>
             </div>
       </div>
